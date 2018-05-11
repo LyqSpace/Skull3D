@@ -10,13 +10,28 @@ body {
 }
 
 .container {
-    width: 960px;
+    width: 1200px;
     margin: 0 auto;
     margin-top: 5px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: flex-start;
+}
+
+.main {
+    width: 960px;
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
     align-items: center;
+}
+
+.side {
+    width: 220px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
 }
 
 #scene {

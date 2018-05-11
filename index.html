@@ -8,121 +8,27 @@
 
 	<link rel="stylesheet" type="text/css" href="css/style.css" />
 
+	<script type="text/javascript" src = "js/jquery-3.3.1.min.js"></script>
 	<script type="text/javascript" src = "js/three.js"></script>
 	<script type="text/javascript" src = "js/skull.js"></script>
+	<script type="text/javascript" src = "js/Detector.js"></script>
+	<script type="text/javascript" src = "js/OrbitControls.js"></script>
 	<!-- <script type="text/javascript" src = "js/FirstPerson_Control.js"></script> -->
 	<script type="text/javascript" src = "js/stats.min.js"></script>
+	<script type="text/javascript" src = "js/render.js"></script>
 	
 </head>
 <body>
-	<!-- <div class="info" id="control_info">
-		<br/>
-		<b>A|D</b> Y axis rotate, <b>W|S</b> X axis rotate, <b>Q|E</b> Z axis rotate
-		<br/>
-		<b>Mouse Drag</b> look around, <b>Mouse Wheel</b> zoom inout
-		<br/>
-	</div> -->
-
     <div class="container">
-        <div id="scene"></div>
-        <br/>
-            <!-- hold <b>SHIFT</b> fine tuning, <b>L</b> lock the screen, <b>C</b> clear points, <b>R</b> reset camera
-            <br/>
-            <br/>
-            When the screen is <b>unlocked</b>, WS AD QE mouseDrag mouseWheel can control the view point.
-            <br/>
-            When the screen is <b>locked</b>, click multi-points on the map to show the min-distance path. -->
-        <hr/>
-        <p>All rights reserved. Email: root#lyq.me</p>
+		<div class="main">
+			<div id="scene"></div>
+			<br/>
+			<p>All rights reserved. Email: root#lyq.me</p>
+		</div>
+		<div class="side">
+			<div id="control-sticks"></div>
+		</div>
     </div>
-	
-
-	<script type="text/javascript">
-
-		var scale = 800;
-		var fileName = "african";
-
-		var canvas = document.getElementById( "scene" );
-
-		var renderer = new THREE.WebGLRenderer( {antialias: true} );
-		//var renderer = new THREE.CanvasRenderer();
-		renderer.setSize( canvas.offsetWidth, canvas.offsetHeight );
-		renderer.setClearColor( 0xB5DBED);
-		canvas.appendChild( renderer.domElement );
-
-		var camera = new THREE.PerspectiveCamera( 45, canvas.offsetWidth/canvas.offsetHeight, 0.01, 4000 );
-		camera.position.z = scale / 4;
-		//camera.lookAt(0, 0, 0);
-
-		var scene = new THREE.Scene();
-
-		var light = new THREE.HemisphereLight( 0xfffff0, 0x101020, 1.25 );
-		//var light = new THREE.DirectionalLight(0xffffff, 0.8);
-		light.position.set( 0, 0, 10 );
-		scene.add( light );
-
-		var material = new THREE.MeshBasicMaterial();
-		material.color = { r:10/255, g:136/255, b:56/255 };
-		var geometry = new THREE.PlaneBufferGeometry( scale, scale );
-		var plane = new THREE.Mesh( geometry, material );
-		scene.add( plane );
-        
-        var skull = new Skull();
-        skull.init(fileName, function () {
-            // scene.add(skull.bones);
-            // scene.add(skull.featurePts);
-        });
-		// var city = new City( scale );
-		// city.city_generator( filename, function (){
-
-		// 	scene.add( city.buildings );
-		// 	scene.add( city.highways );
-		// 	scene.add( city.footways );
-		// 	scene.add( city.canals );
-		// 	scene.add( city.streams );
-		// 	scene.add( city.riverbanks );
-
-		// 	for ( var name_index = 0; name_index < city.names.length; name_index++ ) {
-
-		// 		scene.add( city.names[name_index] );
-		// 	}
-
-		// });
-
-		// var control = new FirstPerson_Control( scale, camera, plane, scene, city.touch_points, city.edge, canvas );
-		// canvas.addEventListener( "resize", onWindowResize, false );
-
-		var stats = new Stats();
-		stats.domElement.style.position = 'absolute';
-		stats.domElement.style.top = '5px';
-        stats.domElement.style.left = '5px';
-		stats.domElement.style.zIndex = 100;
-		canvas.appendChild( stats.domElement );
-
-		animation();
-
-		function onWindowResize() {
-
-			camera.aspect = canvas.offsetWidth / canvas.offsetHeight;
-			camera.updateProjectionMatrix();
-
-			renderer.setSize( canvas.offsetWidth, canvas.offsetHeight );
-
-		}
-
-		function animation() {
-
-			requestAnimationFrame( animation );
-
-			// control.update();
-			stats.update();
-			renderer.render( scene, camera );
-
-		}
-
-	</script>
-
-	
 
 </body>
 </html>
