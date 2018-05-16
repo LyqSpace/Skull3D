@@ -7,28 +7,52 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 	<title>3D Skull</title>
 
+	<link rel="stylesheet" type="text/css" href="css/bootstrap.min.css" />
 	<link rel="stylesheet" type="text/css" href="css/style.css" />
 
+	<!-- jquery -->
 	<script type="text/javascript" src="js/jquery-3.3.1.min.js"></script>
+
+	<!-- bootstrap -->
+	<script type="text/javascript" src="js/popper.min.js"></script>
+	<script type="text/javascript" src="js/bootstrap.min.js"></script>
+
+	<!-- three.js -->
 	<script type="text/javascript" src="js/three.js"></script>
-	<script type="text/javascript" src="js/skull.js"></script>
 	<script type="text/javascript" src="js/Detector.js"></script>
 	<script type="text/javascript" src="js/OrbitControls.js"></script>
-	<!-- <script type="text/javascript" src = "js/FirstPerson_Control.js"></script> -->
 	<script type="text/javascript" src="js/stats.min.js"></script>
+	
+	<!-- custom js -->
+	<script type="text/javascript" src="js/skull.js"></script>
 	<script type="text/javascript" src="js/render.js"></script>
+
 
 </head>
 
 <body>
-	<div class="container">
+	<div class="page">
 		<div class="main">
+
+			<!-- scene -->
 			<div id="scene"></div>
 			<br/>
 			<p>All rights reserved. Email: root#lyq.me</p>
+
 		</div>
 		<div class="side">
-			<div id="control-sticks">123</div>
+			<div id="stick-control">
+				<hr>
+				<label for="stick-index">Stick Index</label>
+				<select class="custom-select" id="stick-index" disabled="disabled" onchange="changeStickIndex()">
+				</select>
+				<label for="stick-length">Stick Length</label>
+				<input type="range" class="custom-range" min="0.1" max="30" step="0.1" id="stick-length" 
+					disabled="disabled" onchange="changeStickLength()">
+			</div>
+			<div id="control-transparence">
+				<hr>
+			</div>
 		</div>
 	</div>
 

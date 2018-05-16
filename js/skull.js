@@ -24,13 +24,20 @@ function getRotationAngle(vec) {
 
 }
 
-function getStickMesh(stick, scale, color=0x00aabb) {
+function getStickMesh(stick, scale) {
+
+    var defaultColor = 0x00aabb;
+    var highlightColor = 0xff9900;
 
     var geometry = new THREE.CylinderGeometry(1, 1, stick.len, 16);
 
     var material = new THREE.MeshPhongMaterial();
     material.side = THREE.DoubleSide;
-    material.color = new THREE.Color(color);
+    if (stick.highlight) {
+        material.color = new THREE.Color(highlightColor);
+    } else {
+        material.color = new THREE.Color(defaultColor);
+    }
 
     var halfLen = stick.len / 2;
     var centerPt = new THREE.Vector3(
@@ -42,7 +49,7 @@ function getStickMesh(stick, scale, color=0x00aabb) {
     var cylinderMesh = new THREE.Mesh(geometry, material);
     cylinderMesh.setRotationFromAxisAngle(stick.axis, stick.angle);
     cylinderMesh.position.set(centerPt.x, centerPt.y, centerPt.z);
-    console.log(cylinderMesh.position);
+    // console.log(cylinderMesh.position);
     
     return cylinderMesh;
 
@@ -183,14 +190,15 @@ var Skull = function (scale) {
 
                 var axis = getRotationAxis(vec);
                 var angle = getRotationAngle(vec);
-                console.log(axis, angle);
+                // console.log(axis, angle);
                 
                 var stick = {
-                    'startPt': startPt,
-                    'vec': vec,
-                    'len': len,
-                    'axis': axis,
-                    'angle': angle
+                    "startPt": startPt,
+                    "vec": vec,
+                    "len": len,
+                    "axis": axis,
+                    "angle": angle,
+                    "highlight": false,
                 };
                 object.sticks.push(stick);
                 
