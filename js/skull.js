@@ -42,7 +42,7 @@ function getStickMesh(stick, scale) {
     var halfLen = stick.len / 2;
     var centerPt = new THREE.Vector3(
         stick.startPt.x + halfLen * stick.vec.x,
-        stick.startPt.y + halfLen * stick.vec.y + scale,
+        stick.startPt.y + halfLen * stick.vec.y,
         stick.startPt.z + halfLen * stick.vec.z,
     );
 
@@ -50,7 +50,7 @@ function getStickMesh(stick, scale) {
     cylinderMesh.setRotationFromAxisAngle(stick.axis, stick.angle);
     cylinderMesh.position.set(centerPt.x, centerPt.y, centerPt.z);
     // console.log(cylinderMesh.position);
-    
+
     return cylinderMesh;
 
 }
@@ -62,23 +62,67 @@ var Skull = function (scale) {
     object.scale = scale;
     object.bodyState = 0;
     object.sticksState = 0;
+    object.faceState = 0;
 
-    object.loadData = function (fileName, callback) {
+    object.loadData = function (objName, callback) {
 
         var xhttp = {};
-        var bodyFilePath = "data/" + fileName + ".obj";
-        var sticksFilePath = "data/" + fileName + "_sticks.cm";
+        var bodyFilePath = "models/" + objName + ".obj";
+        var sticksFilePath = "models/" + objName + "_sticks.cm";
+        var faceFilePath = "models/" + objName + "_face.obj";
 
-        loadXMLDoc(bodyFilePath, "body", function () {
+        // Load skull body
+        var manager = new THREE.LoadingManager();
+        var bodyLoader = new THREE.OBJLoader(manager);
+        var faceLoader = new THREE.OBJLoader(manager);
+        bodyLoader.load(
 
-            if (xhttp["body"].readyState != 4) return;
+            bodyFilePath, // resource URL
 
-            object.bodyTxt = xhttp["body"].response;
-            object.bodyState = 1;
-            callback();
+            function (obj) { // onLoad callback
+                object.bodyMesh = obj.children[0];
+                object.bodyState = 1;
+                callback();
+            },
 
-        });
+            function (xhr) { // onProgress callback
+                var progress = xhr.loaded / xhr.total * 100;
+                if (!isNaN(progress)) {
+                    console.log("Skull body", progress + "% loaded.");
+                }
+            },
 
+            function (err) { // onError callback
+                console.error("An error happened when loading skull body.", err);
+            }
+
+        );
+
+        // Load face
+        faceLoader.load(
+
+            faceFilePath,
+
+            function (obj) { // onLoad callback
+                object.faceMesh = obj.children[0];
+                object.faceState = 1;
+                callback();
+            },
+
+            function (xhr) { // onProgress callback
+                var progress = xhr.loaded / xhr.total * 100;
+                if (!isNaN(progress)) {
+                    console.log("Face", progress + "% loaded.");
+                }
+            },
+
+            function (err) { // onError callback
+                console.error("An error happened when loading face.", err);
+            }
+
+        );
+
+        // Load sticks
         loadXMLDoc(sticksFilePath, "sticks", function () {
 
             if (xhttp["sticks"].readyState != 4) return;
@@ -110,12 +154,11 @@ var Skull = function (scale) {
 
     };
 
-    object.init = function (fileName, callback) {
+    object.init = function (objName, callback) {
 
-        object.loadData(fileName, function () {
+        object.loadData(objName, function () {
 
             if (object.bodyState == 1) {
-                generateBody();
                 object.bodyState = 2;
             }
 
@@ -124,48 +167,17 @@ var Skull = function (scale) {
                 object.sticksState = 2;
             }
 
-            if (object.bodyState == 2 && object.sticksState == 2) {
+            if (object.faceState == 1) {
+                object.faceState = 2;
+            }
+
+            if (object.bodyState == 2 && object.sticksState == 2 && object.faceState == 2) {
                 callback();
             }
 
         });
 
     };
-
-    function generateBody() {
-
-        var arr = object.bodyTxt.split("\n");
-        var vertices = [];
-        var faces = [];
-
-        arr.forEach(function (tupleTxt) {
-
-            var tuple = tupleTxt.split(" ");
-
-            if (tuple[0] == "v") {
-                for (var i = 1; i < 4; i++) tuple[i] = parseFloat(tuple[i]);
-                vertices.push(new THREE.Vector3(tuple[1], tuple[2] + object.scale, tuple[3]));
-            }
-
-            if (tuple[0] == "f") {
-                for (var i = 1; i < 4; i++) tuple[i] = parseInt(tuple[i]) - 1;
-                faces.push(new THREE.Face3(tuple[1], tuple[2], tuple[3]));
-            }
-
-        });
-
-        var geometry = new THREE.Geometry();
-        geometry.vertices = vertices;
-        geometry.faces = faces;
-        geometry.computeFaceNormals();
-
-        var material = new THREE.MeshLambertMaterial();
-        material.side = THREE.DoubleSide;
-        material.color = new THREE.Color(0xddcccc);
-
-        object.bodyMesh = new THREE.Mesh(geometry, material);
-
-    }
 
     function generateSticks() {
 
@@ -191,7 +203,7 @@ var Skull = function (scale) {
                 var axis = getRotationAxis(vec);
                 var angle = getRotationAngle(vec);
                 // console.log(axis, angle);
-                
+
                 var stick = {
                     "startPt": startPt,
                     "vec": vec,
@@ -201,7 +213,7 @@ var Skull = function (scale) {
                     "highlight": false,
                 };
                 object.sticks.push(stick);
-                
+
                 var stickMesh = getStickMesh(stick, object.scale);
                 object.sticksMesh.push(stickMesh);
 

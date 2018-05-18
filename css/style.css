@@ -34,6 +34,14 @@ body {
     justify-content: flex-start;
 }
 
+.side hr {
+    width: 100%;
+}
+
+.form-row {
+    align-items: center;
+}
+
 #scene {
 	width: 960px;
 	height: 600px;

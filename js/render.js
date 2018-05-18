@@ -1,10 +1,9 @@
+var objName = "european";
 var scale = 150;
 var camera, controls, scene, renderer, stats;
 var skull;
 
-function init() {
-
-    var fileName = "african";
+function init_scene() {
 
     var canvas = $("#scene")[0];
 
@@ -15,7 +14,7 @@ function init() {
 
     // camera
     camera = new THREE.PerspectiveCamera(45, canvas.offsetWidth / canvas.offsetHeight, 0.01, 4000);
-    camera.position.x = -scale * 3;
+    camera.position.set(-scale * 3, -scale, 0);
 
     scene = new THREE.Scene();
 
@@ -44,11 +43,20 @@ function init() {
     // lightHelper1 = new THREE.SpotLightHelper( spotLight1 );
     // scene.add( lightHelper1 );
 
+    // controls
+    controls = new THREE.OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.25;
+    controls.maxDistance = scale * 8;
+    controls.target.set(0, -scale, 0);
+    // controls.update();
+
     // skull
     skull = new Skull(scale);
-    skull.init(fileName, function () {
+    skull.init(objName, function () {
 
         scene.add(skull.bodyMesh);
+        scene.add(skull.faceMesh);
         for (var i = 0; i < skull.sticksMesh.length; i++) {
             scene.add(skull.sticksMesh[i]);
         }
@@ -58,12 +66,6 @@ function init() {
         console.log("Init stick control done.");
 
     });
-
-    // controls
-    controls = new THREE.OrbitControls(camera, renderer.domElement);
-    controls.enableDamping = true;
-    controls.dampingFactor = 0.25;
-    controls.maxDistance = scale * 8;
 
     // stats
     stats = new Stats();
@@ -92,7 +94,7 @@ function animate() {
 }
 
 function updateStickMesh(stickIndex) {
-    
+
     var newStickMesh = getStickMesh(skull.sticks[stickIndex], scale);
     scene.remove(skull.sticksMesh[stickIndex]);
     skull.sticksMesh[stickIndex].geometry.dispose();
@@ -110,14 +112,18 @@ function init_stick_control() {
     var stickIndexObj = $("#stick-index")[0];
     stickIndexObj.disabled = false;
     for (var i = 0; i < skull.sticks.length; i++) {
-        var optionObj = $("<option value=\"" + i.toString() + "\">" + i.toString() +"</option>")[0];
+        var optionObj = $("<option value=\"" + i.toString() + "\">" + i.toString() + "</option>")[0];
         stickIndexObj.append(optionObj);
     }
     stickIndexObj.value = 0;
 
-    var stickLengthObj = $("#stick-length")[0];
-    stickLengthObj.disabled = false;
-    stickLengthObj.value = skull.sticks[stickIndex].len;
+    var stickLengthRangeObj = $("#stick-length-range")[0];
+    stickLengthRangeObj.disabled = false;
+    stickLengthRangeObj.value = skull.sticks[stickIndex].len;
+
+    var stickLengthInputObj = $("#stick-length-input")[0];
+    stickLengthInputObj.disabled = false;
+    stickLengthInputObj.value = skull.sticks[stickIndex].len;
 
     skull.sticks[stickIndex].highlight = true;
     updateStickMesh(stickIndex);
@@ -127,13 +133,13 @@ function init_stick_control() {
 function changeStickIndex() {
 
     var stickIndex = $("#stick-index")[0].value;
-    var stickLengthObj = $("#stick-length")[0];
-    
+    var stickLengthRangeObj = $("#stick-length-range")[0];
+
     console.log("Select stick ", stickIndex, ", Stick length ", skull.sticks[stickIndex].len);
-    stickLengthObj.value = skull.sticks[stickIndex].len;
+    stickLengthRangeObj.value = skull.sticks[stickIndex].len;
 
     for (var i = 0; i < skull.sticks.length; i++) {
-        
+
         if (i == stickIndex) {
             skull.sticks[stickIndex].highlight = true;
             updateStickMesh(stickIndex);
@@ -148,12 +154,41 @@ function changeStickIndex() {
 
 }
 
-function changeStickLength() {
+function changeStickLengthByRange() {
 
     var stickIndex = $("#stick-index")[0].value;
-    var stickLength = $("#stick-length")[0].value;
-    
-    console.log("Change stick ", stickIndex, ", length to ", skull.sticks[stickIndex].len);
+    var stickLength = $("#stick-length-range")[0].value;
+    var stickLengthInputObj = $("#stick-length-input")[0];
+
+    console.log("Change stick by range ", stickIndex, ", length to ", stickLength);
+    stickLengthInputObj.value = stickLength;
+
+    skull.sticks[stickIndex].len = stickLength;
+    updateStickMesh(stickIndex);
+
+}
+
+function changeStickLengthByInput() {
+
+    var stickIndex = $("#stick-index")[0].value;
+    var stickLength = $("#stick-length-input")[0].value;
+    var stickLengthInputObj = $("#stick-length-input")[0];
+    var stickLengthRangeObj = $("#stick-length-range")[0];
+
+    console.log("Change stick by input ", stickIndex, ", length to ", stickLength);
+
+    if (isNaN(stickLength)) {
+        console.log("Change stick by input ", stickLength, " not a number");
+        return;
+    } else {
+        stickLength = parseFloat(stickLength);
+        stickLength = Math.min(30, stickLength);
+        stickLength = Math.max(0.1, stickLength);
+    }
+
+    stickLengthInputObj.value = stickLength;
+    stickLengthRangeObj.value = stickLength;
+
     skull.sticks[stickIndex].len = stickLength;
     updateStickMesh(stickIndex);
 
@@ -163,7 +198,7 @@ $(document).ready(function () {
 
     if (!Detector.webgl) Detector.addGetWebGLMessage();
 
-    init();
+    init_scene();
     animate();
 
 });
