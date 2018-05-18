@@ -71,10 +71,10 @@ var Skull = function (scale) {
         var sticksFilePath = "models/" + objName + "_sticks.cm";
         var faceFilePath = "models/" + objName + "_face.obj";
 
-        // Load skull body
         var manager = new THREE.LoadingManager();
+        
+        // Load skull body
         var bodyLoader = new THREE.OBJLoader(manager);
-        var faceLoader = new THREE.OBJLoader(manager);
         bodyLoader.load(
 
             bodyFilePath, // resource URL
@@ -99,6 +99,7 @@ var Skull = function (scale) {
         );
 
         // Load face
+        var faceLoader = new THREE.OBJLoader(manager);
         faceLoader.load(
 
             faceFilePath,
@@ -123,34 +124,30 @@ var Skull = function (scale) {
         );
 
         // Load sticks
-        loadXMLDoc(sticksFilePath, "sticks", function () {
+        var SticksLoader = new THREE.FileLoader();
+        SticksLoader.load(
 
-            if (xhttp["sticks"].readyState != 4) return;
+            sticksFilePath,
 
-            object.sticksTxt = xhttp["sticks"].response;
-            object.sticksState = 1;
-            callback();
+            function (data) { // onLoad callback
+                object.sticksTxt = data
+                object.sticksState = 1;
+                callback();
+            },
 
-        });
+            function (xhr) { // onProgress callback
+                var progress = xhr.loaded / xhr.total * 100;
+                if (!isNaN(progress)) {
+                    console.log("Sticks", progress + "% loaded.");
+                }
+            },
 
-        function loadXMLDoc(filePath, name, callback) {
-
-            if (window.XMLHttpRequest) {
-
-                xhttp[name] = new XMLHttpRequest();
-
-            } else {// code for IE5 and IE6
-
-                xhttp[name] = new ActiveXObject("Microsoft.XMLHTTP");
-
+            function (err) { // onError callback
+                console.error("An error happened when loading sticks.", err);
             }
 
-            xhttp[name].onreadystatechange = callback;
-            xhttp[name].overrideMimeType("text/plain; charset=utf-8");
-            xhttp[name].open("GET", filePath, true);
-            xhttp[name].send();
+        );
 
-        }
 
     };
 

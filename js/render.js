@@ -60,10 +60,10 @@ function init_scene() {
         for (var i = 0; i < skull.sticksMesh.length; i++) {
             scene.add(skull.sticksMesh[i]);
         }
-        console.log("Add skull done.");
+        console.log("[INFO] Add skull done.");
 
         init_stick_control();
-        console.log("Init stick control done.");
+        console.log("[INFO] Init stick control done.");
 
     });
 
