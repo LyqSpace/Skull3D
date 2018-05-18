@@ -1,65 +1,12 @@
-function getRotationAxis(vec) {
-
-    //Three.js uses a Y up coordinate system, so the cube inits with this vector
-    var upAxis = new THREE.Vector3(0, 1, 0);
-
-    //cross product of the up vector and direction vector
-    var axis = new THREE.Vector3();
-    axis.crossVectors(upAxis, vec);
-    axis.normalize();
-
-    return axis;
-
-}
-
-function getRotationAngle(vec) {
-
-    //Three.js uses a Y up coordinate system, so the cube inits with this vector
-    var upAxis = new THREE.Vector3(0, 1, 0);
-
-    //euler angle between direction vector and up vector
-    var angle = Math.acos(upAxis.dot(vec));
-
-    return angle;
-
-}
-
-function getStickMesh(stick, scale) {
-
-    var defaultColor = 0x00aabb;
-    var highlightColor = 0xff9900;
-
-    var geometry = new THREE.CylinderGeometry(1, 1, stick.len, 16);
-
-    var material = new THREE.MeshPhongMaterial();
-    material.side = THREE.DoubleSide;
-    if (stick.highlight) {
-        material.color = new THREE.Color(highlightColor);
-    } else {
-        material.color = new THREE.Color(defaultColor);
-    }
-
-    var halfLen = stick.len / 2;
-    var centerPt = new THREE.Vector3(
-        stick.startPt.x + halfLen * stick.vec.x,
-        stick.startPt.y + halfLen * stick.vec.y,
-        stick.startPt.z + halfLen * stick.vec.z,
-    );
-
-    var cylinderMesh = new THREE.Mesh(geometry, material);
-    cylinderMesh.setRotationFromAxisAngle(stick.axis, stick.angle);
-    cylinderMesh.position.set(centerPt.x, centerPt.y, centerPt.z);
-    // console.log(cylinderMesh.position);
-
-    return cylinderMesh;
-
-}
-
 var Skull = function (scale) {
 
     var object = this;
 
     object.scale = scale;
+    object.faceOpacity = 0.5;
+    object.bodyOpacity = 1;
+    object.sticksOpacity = 1;
+
     object.bodyState = 0;
     object.sticksState = 0;
     object.faceState = 0;
@@ -72,7 +19,7 @@ var Skull = function (scale) {
         var faceFilePath = "models/" + objName + "_face.obj";
 
         var manager = new THREE.LoadingManager();
-        
+
         // Load skull body
         var bodyLoader = new THREE.OBJLoader(manager);
         bodyLoader.load(
@@ -156,6 +103,7 @@ var Skull = function (scale) {
         object.loadData(objName, function () {
 
             if (object.bodyState == 1) {
+                setBodyProperties();
                 object.bodyState = 2;
             }
 
@@ -165,6 +113,7 @@ var Skull = function (scale) {
             }
 
             if (object.faceState == 1) {
+                setFaceProperties();
                 object.faceState = 2;
             }
 
@@ -175,6 +124,24 @@ var Skull = function (scale) {
         });
 
     };
+
+    function setBodyProperties() {
+        object.bodyMesh.material.side = THREE.DoubleSide;
+        object.bodyMesh.material.color.set(0xddccccc);
+        object.bodyMesh.material.transparent = true;
+        object.bodyMesh.material.opacity = object.bodyOpacity;
+        object.bodyMesh.renderOrder = 0;
+        // console.log("Body Material", object.bodyMesh.material);
+    }
+
+    function setFaceProperties() {
+        object.faceMesh.material.side = THREE.DoubleSide;
+        object.faceMesh.material.color.set(0xccaa99);
+        object.faceMesh.material.transparent = true;
+        object.faceMesh.material.opacity = object.faceOpacity;
+        object.faceMesh.renderOrder = 2;
+        // console.log("Face Material", object.faceMesh.material);
+    }
 
     function generateSticks() {
 
@@ -211,7 +178,7 @@ var Skull = function (scale) {
                 };
                 object.sticks.push(stick);
 
-                var stickMesh = getStickMesh(stick, object.scale);
+                var stickMesh = getStickMesh(stick, object.sticksOpacity);
                 object.sticksMesh.push(stickMesh);
 
             }
@@ -221,3 +188,65 @@ var Skull = function (scale) {
     }
 
 };
+
+// functions
+
+function getRotationAxis(vec) {
+
+    //Three.js uses a Y up coordinate system, so the cube inits with this vector
+    var upAxis = new THREE.Vector3(0, 1, 0);
+
+    //cross product of the up vector and direction vector
+    var axis = new THREE.Vector3();
+    axis.crossVectors(upAxis, vec);
+    axis.normalize();
+
+    return axis;
+
+}
+
+function getRotationAngle(vec) {
+
+    //Three.js uses a Y up coordinate system, so the cube inits with this vector
+    var upAxis = new THREE.Vector3(0, 1, 0);
+
+    //euler angle between direction vector and up vector
+    var angle = Math.acos(upAxis.dot(vec));
+
+    return angle;
+
+}
+
+function getStickMesh(stick, opacity) {
+
+    var defaultColor = 0x00aabb;
+    var highlightColor = 0xff9900;
+
+    var geometry = new THREE.CylinderGeometry(1, 1, stick.len, 16);
+
+    var material = new THREE.MeshPhongMaterial();
+    material.side = THREE.DoubleSide;
+    material.transparent = true;
+    material.opacity = opacity;
+    if (stick.highlight) {
+        material.color = new THREE.Color(highlightColor);
+    } else {
+        material.color = new THREE.Color(defaultColor);
+    }
+
+    var halfLen = stick.len / 2;
+    var centerPt = new THREE.Vector3(
+        stick.startPt.x + halfLen * stick.vec.x,
+        stick.startPt.y + halfLen * stick.vec.y,
+        stick.startPt.z + halfLen * stick.vec.z,
+    );
+
+    var cylinderMesh = new THREE.Mesh(geometry, material);
+    cylinderMesh.setRotationFromAxisAngle(stick.axis, stick.angle);
+    cylinderMesh.position.set(centerPt.x, centerPt.y, centerPt.z);
+    cylinderMesh.renderOrder = 1;
+    // console.log(cylinderMesh.position);
+
+    return cylinderMesh;
+
+}
