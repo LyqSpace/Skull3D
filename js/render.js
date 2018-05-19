@@ -1,7 +1,65 @@
-var objName = "european";
+var dataName;
+var faceDataNameArr = ["european"];
+var bodyDataNameArr = ["european", "african"];
+var sticksDataNameArr = ["european", "african"];
+
 var scale = 120;
 var camera, controls, scene, renderer, stats;
 var skull;
+
+$(document).ready(function () {
+
+    if (!Detector.webgl) Detector.addGetWebGLMessage();
+
+    setDataName();
+    if (dataName["faceDataName"] && dataName["bodyDataName"] && dataName["sticksDataName"]) {
+        init_scene();
+        animate();
+    } else {
+        console.log("Url", dataName, "is undefined.");
+    }
+
+});
+
+// functions
+
+function setDataName() {
+
+    dataName = {
+        "faceDataName": getParam("faceDataName"),
+        "bodyDataName": getParam("bodyDataName"),
+        "sticksDataName": getParam("sticksDataName")
+    }    
+
+    console.log(dataName);
+
+    if (faceDataNameArr.indexOf(dataName["faceDataName"]) == -1) {
+        dataName["faceDataName"] = undefined;
+    }
+    if (bodyDataNameArr.indexOf(dataName["bodyDataName"]) == -1) {
+        dataName["bodyDataName"] = undefined;
+    }
+    if (sticksDataNameArr.indexOf(dataName["sticksDataName"]) == -1) {
+        dataName["sticksDataName"] = undefined;
+    }
+
+    $("#face-data-name")[0].value = dataName["faceDataName"];
+    $("#body-data-name")[0].value = dataName["bodyDataName"];    
+    $("#sticks-data-name")[0].value = dataName["sticksDataName"];    
+
+}
+
+function loadData() {
+    var faceDataName = $("#face-data-name")[0].value;
+    var bodyDataName = $("#body-data-name")[0].value;
+    var sticksDataName = $("#sticks-data-name")[0].value;
+
+    location.href = "index.html?" + 
+        "faceDataName=" + faceDataName + "&" +
+        "bodyDataName=" + bodyDataName + "&" +
+        "sticksDataName=" + sticksDataName;
+
+}
 
 function init_scene() {
 
@@ -23,18 +81,28 @@ function init_scene() {
     // scene.add(axes);
 
     // light
-    var ambientLight = new THREE.AmbientLight(0xffffff, 0.3);
+    var ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
     scene.add(ambientLight);
 
-    var spotLight0 = new THREE.SpotLight(0xffffff, 1);
-    spotLight0.position.set(scale * 2, scale * 2, scale * 2);
+    var spotLight0 = new THREE.SpotLight(0xffffff, 0.5);
+    spotLight0.position.set(scale * 2, -scale, scale * 2);
     spotLight0.angle = Math.PI / 4;
     scene.add(spotLight0);
 
-    var spotLight1 = new THREE.SpotLight(0xffffff, 1);
-    spotLight1.position.set(-scale * 2, scale * 2, -scale * 2);
+    var spotLight1 = new THREE.SpotLight(0xffffff, 0.5);
+    spotLight1.position.set(-scale * 2, -scale, -scale * 2);
     spotLight1.angle = Math.PI / 4;
     scene.add(spotLight1);
+
+    var spotLight2 = new THREE.SpotLight(0xffffff, 0.5);
+    spotLight2.position.set(-scale * 2, -scale, scale * 2);
+    spotLight2.angle = Math.PI / 4;
+    scene.add(spotLight2);
+
+    var spotLight3 = new THREE.SpotLight(0xffffff, 0.5);
+    spotLight3.position.set(scale * 2, -scale, -scale * 2);
+    spotLight3.angle = Math.PI / 4;
+    scene.add(spotLight3);
 
     // light helper
     // lightHelper0 = new THREE.SpotLightHelper( spotLight0 );
@@ -52,8 +120,8 @@ function init_scene() {
     // controls.update();
 
     // skull
-    skull = new Skull(scale);
-    skull.init(objName, function () {
+    skull = new Skull();
+    skull.init(dataName, function () {
 
         scene.add(skull.bodyMesh);
         scene.add(skull.faceMesh);
@@ -70,7 +138,7 @@ function init_scene() {
     // stats
     stats = new Stats();
     stats.domElement.style.zIndex = 100;
-    $(".side")[0].prepend(stats.domElement);
+    $("#stats")[0].prepend(stats.domElement);
 
 }
 
@@ -116,6 +184,8 @@ function init_stick_control() {
 
     skull.sticks[stickIndex].highlight = true;
     updateStickMesh(stickIndex);
+
+    $("#save-sticks")[0].disabled = false;
 
     // Init face opacity
     var faceOpacityRangeObj = $("#face-opacity-range")[0];
@@ -367,12 +437,3 @@ function changeSticksOpacityByInput() {
     }
 
 }
-
-$(document).ready(function () {
-
-    if (!Detector.webgl) Detector.addGetWebGLMessage();
-
-    init_scene();
-    animate();
-
-});

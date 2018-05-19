@@ -1,8 +1,7 @@
-var Skull = function (scale) {
+var Skull = function () {
 
     var object = this;
 
-    object.scale = scale;
     object.faceOpacity = 0.5;
     object.bodyOpacity = 1;
     object.sticksOpacity = 1;
@@ -11,12 +10,12 @@ var Skull = function (scale) {
     object.sticksState = 0;
     object.faceState = 0;
 
-    object.loadData = function (objName, callback) {
+    object.loadData = function (dataName, callback) {
 
         var xhttp = {};
-        var bodyFilePath = "models/" + objName + ".obj";
-        var sticksFilePath = "models/" + objName + "_sticks.cm";
-        var faceFilePath = "models/" + objName + "_face.obj";
+        var bodyFilePath = "models/" + dataName["bodyDataName"] + ".obj";
+        var sticksFilePath = "models/" + dataName["sticksDataName"] + "_sticks.cm";
+        var faceFilePath = "models/" + dataName["faceDataName"] + "_face.obj";
 
         var manager = new THREE.LoadingManager();
 
@@ -29,13 +28,15 @@ var Skull = function (scale) {
             function (obj) { // onLoad callback
                 object.bodyMesh = obj.children[0];
                 object.bodyState = 1;
+                $("#body-loading").html("Skull loaded.");
                 callback();
             },
 
             function (xhr) { // onProgress callback
-                var progress = xhr.loaded / xhr.total * 100;
+                var progress = Math.floor(xhr.loaded / xhr.total * 100);
                 if (!isNaN(progress)) {
-                    console.log("Skull body", progress + "% loaded.");
+                    // console.log("Skull body", progress + "% loaded.");
+                    $("#body-loading").html("Skull " + progress + "%");
                 }
             },
 
@@ -54,13 +55,15 @@ var Skull = function (scale) {
             function (obj) { // onLoad callback
                 object.faceMesh = obj.children[0];
                 object.faceState = 1;
+                $("#face-loading").html("Face loaded.");
                 callback();
             },
 
             function (xhr) { // onProgress callback
-                var progress = xhr.loaded / xhr.total * 100;
+                var progress = Math.floor(xhr.loaded / xhr.total * 100);
                 if (!isNaN(progress)) {
-                    console.log("Face", progress + "% loaded.");
+                    // console.log("Face", progress + "% loaded.");
+                    $("#face-loading").html("Face " + progress + "%");
                 }
             },
 
@@ -79,13 +82,15 @@ var Skull = function (scale) {
             function (data) { // onLoad callback
                 object.sticksTxt = data
                 object.sticksState = 1;
+                $("#sticks-loading").html("Sticks loaded.");
                 callback();
             },
 
             function (xhr) { // onProgress callback
-                var progress = xhr.loaded / xhr.total * 100;
+                var progress = Math.floor(xhr.loaded / xhr.total * 100);
                 if (!isNaN(progress)) {
-                    console.log("Sticks", progress + "% loaded.");
+                    // console.log("Sticks", progress + "% loaded.");
+                    $("#sticks-loading").html("Sticks " + progress + "%");
                 }
             },
 
@@ -98,9 +103,9 @@ var Skull = function (scale) {
 
     };
 
-    object.init = function (objName, callback) {
+    object.init = function (dataName, callback) {
 
-        object.loadData(objName, function () {
+        object.loadData(dataName, function () {
 
             if (object.bodyState == 1) {
                 setBodyProperties();
@@ -127,7 +132,7 @@ var Skull = function (scale) {
 
     function setBodyProperties() {
         object.bodyMesh.material.side = THREE.DoubleSide;
-        object.bodyMesh.material.color.set(0xddccccc);
+        object.bodyMesh.material.color.set(0xbbaaaa);
         object.bodyMesh.material.transparent = true;
         object.bodyMesh.material.opacity = object.bodyOpacity;
         object.bodyMesh.renderOrder = 0;

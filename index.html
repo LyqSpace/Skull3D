@@ -24,7 +24,11 @@
 	<script type="text/javascript" src="js/lib/OBJLoader.js"></script>
 	<script type="text/javascript" src="js/lib/stats.min.js"></script>
 
+	<!-- FileSaver.js -->
+	<script type="text/javascript" src="js/lib/FileSaver.js"></script>
+
 	<!-- custom js -->
+	<script type="text/javascript" src="js/utils.js"></script>
 	<script type="text/javascript" src="js/skull.js"></script>
 	<script type="text/javascript" src="js/render.js"></script>
 
@@ -37,52 +41,95 @@
 
 			<!-- scene -->
 			<div id="scene"></div>
-			<br />
-			<p>Authors: Celong Liu, Xin Li, Yongqing Liang. All rights reserved. Email: root#lyq.me</p>
+			<p>Authors: Celong Liu, Xin Li, Yongqing Liang. All rights reserved.</p>
 
 		</div>
 		<div class="side">
-			<hr />
+
+			<!-- stats -->
 			<div class="form-group">
-				<label for="data-name">Pick Data</label>
-				<select class="custom-select" id="data-name">
-					<option value="european">European</option>
-				</select>
-			</div>
-			<div class="form-group">
-				<label for="stick-index">Stick Index</label>
-				<select class="custom-select" id="stick-index" disabled="disabled" onchange="changeStickIndex()">
-				</select>
-			</div>
-			<div class="form-group">
-				<label for="stick-length-range">Stick Length (0,30]</label>
 				<div class="form-row">
-					<input type="range" class="custom-range col-md-9" min="0.1" max="30" step="0.1" id="stick-length-range" disabled="disabled"
+					<div class="col-md-5" id="stats"></div>
+					<div class="col-md-7">
+						<p id="body-loading"></p>
+						<p id="face-loading"></p>
+						<p id="sticks-loading"></p>
+					</div>
+				</div>
+			</div>
+
+			<!-- Load Data -->
+			<div class="form-group">
+				<div class="form-row">
+					<label class="col-md-5" for="body-data-name">Skull Data</label>
+					<label class="col-md-5 offset-md-1" for="face-data-name">Face Data</label>
+				</div>
+				<div class="form-row">
+					<select class="custom-select form-control-sm col-md-5" id="body-data-name">
+						<option value="european">European</option>
+						<option value="african">African</option>
+					</select>
+					<select class="custom-select form-control-sm col-md-5 offset-md-1" id="face-data-name">
+						<option value="european">European</option>
+					</select>
+				</div>
+			</div>
+			<div class="form-group">
+				<div class="form-row">
+					<label class="col-md-8" for="sticks-data-name">Sticks Data</label>
+				</div>
+				<div class="form-row">
+					<select class="custom-select form-control-sm col-md-5" id="sticks-data-name">
+						<option value="european">European</option>
+						<option value="african">African</option>
+					</select>
+					<button type="button" class="btn btn-outline-primary btn-sm offset-md-1" onclick="loadData()">Load Data</button>
+				</div>
+				
+			</div>
+			<hr>
+
+			<!-- Sticks -->
+			<div class="form-group">
+				<div class="form-row">
+					<label class="col-md-3" for="stick-index">Stick</label>
+					<select class="custom-select form-control-sm col-md-3" id="stick-index" disabled="disabled" onchange="changeStickIndex()">
+					</select>
+					<button type="button" class="btn btn-outline-primary btn-sm offset-md-1" disabled="disabled" id="save-sticks">Save</button>
+				</div>
+			</div>
+			<div class="form-group">
+				<label for="stick-length-range">Stick Length [0,30]</label>
+				<div class="form-row">
+					<input type="range" class="custom-range form-control-sm col-md-9" min="0.1" max="30" step="0.1" id="stick-length-range" disabled="disabled"
 						onchange="changeStickLengthByRange()">
-					<input type="text" class="form-control col-md-3" id="stick-length-input" disabled="disabled" oninput="changeStickLengthByInput()"
+					<input type="text" class="form-control form-control-sm col-md-3" id="stick-length-input" disabled="disabled" oninput="changeStickLengthByInput()"
 					/>
 				</div>
 			</div>
+			<hr>
+
+			<!-- Opacity -->
 			<div class="form-group">
-				<label for="face-opacity-range">Face Opacity [0,1]</label>
-				<div class="form-row">
-					<input type="range" class="custom-range col-md-9" min="0" max="1" step="0.05" id="face-opacity-range" disabled="disabled"
-						onchange="changeFaceOpacityByRange()">
-					<input type="text" class="form-control col-md-3" id="face-opacity-input" disabled="disabled" oninput="changeFaceOpacityByInput()"
-					/>
-				</div>
 				<label for="body-opacity-range">Skull Opacity [0,1]</label>
 				<div class="form-row">
-					<input type="range" class="custom-range col-md-9" min="0" max="1" step="0.05" id="body-opacity-range" disabled="disabled"
+					<input type="range" class="custom-range form-control-sm col-md-9" min="0" max="1" step="0.05" id="body-opacity-range" disabled="disabled"
 						onchange="changeBodyOpacityByRange()">
-					<input type="text" class="form-control col-md-3" id="body-opacity-input" disabled="disabled" oninput="changeBodyOpacityByInput()"
+					<input type="text" class="form-control form-control-sm col-md-3" id="body-opacity-input" disabled="disabled" oninput="changeBodyOpacityByInput()"
+					/>
+				</div>
+				<label for="face-opacity-range">Face Opacity [0,1]</label>
+				<div class="form-row">
+					<input type="range" class="custom-range form-control-sm col-md-9" min="0" max="1" step="0.05" id="face-opacity-range" disabled="disabled"
+						onchange="changeFaceOpacityByRange()">
+					<input type="text" class="form-control form-control-sm col-md-3" id="face-opacity-input" disabled="disabled" oninput="changeFaceOpacityByInput()"
 					/>
 				</div>
 				<label for="sticks-opacity-range">Sticks Opacity [0,1]</label>
 				<div class="form-row">
-					<input type="range" class="custom-range col-md-9" min="0" max="1" step="0.05" id="sticks-opacity-range" disabled="disabled"
+					<input type="range" class="custom-range form-control-sm col-md-9" min="0" max="1" step="0.05" id="sticks-opacity-range" disabled="disabled"
 						onchange="changeSticksOpacityByRange()">
-					<input type="text" class="form-control col-md-3" id="sticks-opacity-input" disabled="disabled" oninput="changeSticksOpacityByInput()"
+					<input type="text" class="form-control form-control-sm col-md-3" id="sticks-opacity-input" disabled="disabled" oninput="changeSticksOpacityByInput()"
 					/>
 				</div>
 			</div>

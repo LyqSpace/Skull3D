@@ -9,6 +9,14 @@ body {
     font-size: 13px;
 }
 
+hr {
+    width: 100%;
+}
+
+p {
+    margin-bottom: 0;
+}
+
 .page {
     width: 1200px;
     margin: 0 auto;
@@ -34,17 +42,18 @@ body {
     justify-content: flex-start;
 }
 
-.side hr {
-    width: 100%;
-}
-
 .form-row {
     align-items: center;
 }
 
+.no-padding {
+    padding: 0;
+}
+
 #scene {
 	width: 960px;
-	height: 600px;
+    height: 600px;
+    margin-bottom: 1rem;
 }
 
 b {
