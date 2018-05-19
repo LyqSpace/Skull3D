@@ -31,7 +31,7 @@ function setDataName() {
         "sticksDataName": getParam("sticksDataName")
     }    
 
-    console.log(dataName);
+    console.log("[INFO] Data name", dataName);
 
     if (faceDataNameArr.indexOf(dataName["faceDataName"]) == -1) {
         dataName["faceDataName"] = undefined;
