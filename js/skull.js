@@ -6,130 +6,34 @@ var Skull = function () {
     object.bodyOpacity = 1;
     object.sticksOpacity = 1;
 
-    object.bodyState = 0;
-    object.sticksState = 0;
-    object.faceState = 0;
+    object.initBody = function (data) {
 
-    object.loadData = function (dataName, callback) {
+        var loader = new THREE.OBJLoader();
+        object.bodyMesh = loader.parse(data["txt"]).children[0];
 
-        var xhttp = {};
-        var bodyFilePath = "models/" + dataName["bodyDataName"] + ".obj";
-        var sticksFilePath = "models/" + dataName["sticksDataName"] + "_sticks.cm";
-        var faceFilePath = "models/" + dataName["faceDataName"] + "_face.obj";
-
-        var manager = new THREE.LoadingManager();
-
-        // Load skull body
-        var bodyLoader = new THREE.OBJLoader(manager);
-        bodyLoader.load(
-
-            bodyFilePath, // resource URL
-
-            function (obj) { // onLoad callback
-                object.bodyMesh = obj.children[0];
-                object.bodyState = 1;
-                $("#body-loading").html("Skull loaded.");
-                callback();
-            },
-
-            function (xhr) { // onProgress callback
-                var progress = Math.floor(xhr.loaded / xhr.total * 100);
-                if (!isNaN(progress)) {
-                    // console.log("Skull body", progress + "% loaded.");
-                    $("#body-loading").html("Skull " + progress + "%");
-                }
-            },
-
-            function (err) { // onError callback
-                console.error("An error happened when loading skull body.", err);
-            }
-
-        );
-
-        // Load face
-        var faceLoader = new THREE.OBJLoader(manager);
-        faceLoader.load(
-
-            faceFilePath,
-
-            function (obj) { // onLoad callback
-                object.faceMesh = obj.children[0];
-                object.faceState = 1;
-                $("#face-loading").html("Face loaded.");
-                callback();
-            },
-
-            function (xhr) { // onProgress callback
-                var progress = Math.floor(xhr.loaded / xhr.total * 100);
-                if (!isNaN(progress)) {
-                    // console.log("Face", progress + "% loaded.");
-                    $("#face-loading").html("Face " + progress + "%");
-                }
-            },
-
-            function (err) { // onError callback
-                console.error("An error happened when loading face.", err);
-            }
-
-        );
-
-        // Load sticks
-        var SticksLoader = new THREE.FileLoader();
-        SticksLoader.load(
-
-            sticksFilePath,
-
-            function (data) { // onLoad callback
-                object.sticksTxt = data
-                object.sticksState = 1;
-                $("#sticks-loading").html("Sticks loaded.");
-                callback();
-            },
-
-            function (xhr) { // onProgress callback
-                var progress = Math.floor(xhr.loaded / xhr.total * 100);
-                if (!isNaN(progress)) {
-                    // console.log("Sticks", progress + "% loaded.");
-                    $("#sticks-loading").html("Sticks " + progress + "%");
-                }
-            },
-
-            function (err) { // onError callback
-                console.error("An error happened when loading sticks.", err);
-            }
-
-        );
-
+        setBodyProperties();
+        data["state"] = 2;
 
     };
 
-    object.init = function (dataName, callback) {
+    object.initFace = function (data) {
 
-        object.loadData(dataName, function () {
+        var loader = new THREE.OBJLoader();
+        object.faceMesh = loader.parse(data["txt"]).children[0];
 
-            if (object.bodyState == 1) {
-                setBodyProperties();
-                object.bodyState = 2;
-            }
-
-            if (object.sticksState == 1) {
-                generateSticks();
-                object.sticksState = 2;
-            }
-
-            if (object.faceState == 1) {
-                setFaceProperties();
-                object.faceState = 2;
-            }
-
-            if (object.bodyState == 2 && object.sticksState == 2 && object.faceState == 2) {
-                callback();
-            }
-
-        });
+        setFaceProperties();
+        data["state"] = 2;
 
     };
 
+    object.initSticks = function (data) {
+
+        generateSticks(data["txt"]);
+        data["state"] = 2;
+
+    };
+
+    // functions
     function setBodyProperties() {
         object.bodyMesh.material.side = THREE.DoubleSide;
         object.bodyMesh.material.color.set(0xbbaaaa);
@@ -148,9 +52,9 @@ var Skull = function () {
         // console.log("Face Material", object.faceMesh.material);
     }
 
-    function generateSticks() {
+    function generateSticks(sticksTxt) {
 
-        var arr = object.sticksTxt.split("\n");
+        var arr = sticksTxt.split("\n");
         object.sticksMesh = [];
         object.sticks = [];
 

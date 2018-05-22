@@ -1,73 +1,136 @@
-var dataName;
-var faceDataNameArr = ["european"];
-var bodyDataNameArr = ["european", "african"];
-var sticksDataNameArr = ["european", "african"];
+var uploadedData = {};
+var uploadedDataName = {};
+var defaultDataName = "european";
 
 var scale = 120;
-var camera, controls, scene, renderer, stats;
+var camera, controls, scene, renderer, stats, animationId;
 var skull;
 
 $(document).ready(function () {
 
     if (!Detector.webgl) Detector.addGetWebGLMessage();
 
-    setDataName();
-    if (dataName["faceDataName"] && dataName["bodyDataName"] && dataName["sticksDataName"]) {
-        init_scene();
-        animate();
-    } else {
-        console.log("Url", dataName, "is undefined.");
-    }
-
 });
 
 // functions
+function uploadData() {
 
-function setDataName() {
+    var bodyFile = $("#body-file")[0].files[0];
+    var faceFile = $("#face-file")[0].files[0];
+    var sticksFile = $("#sticks-file")[0].files[0];
 
-    dataName = {
-        "faceDataName": getParam("faceDataName"),
-        "bodyDataName": getParam("bodyDataName"),
-        "sticksDataName": getParam("sticksDataName")
-    }    
-
-    console.log("[INFO] Data name", dataName);
-
-    if (faceDataNameArr.indexOf(dataName["faceDataName"]) == -1) {
-        dataName["faceDataName"] = undefined;
-    }
-    if (bodyDataNameArr.indexOf(dataName["bodyDataName"]) == -1) {
-        dataName["bodyDataName"] = undefined;
-    }
-    if (sticksDataNameArr.indexOf(dataName["sticksDataName"]) == -1) {
-        dataName["sticksDataName"] = undefined;
+    if (bodyFile == undefined || faceFile == undefined || sticksFile == undefined) {
+        console.log("[ERR]", bodyFile, faceFile, sticksFile, "can't be undefined.");
+        return;
     }
 
-    $("#face-data-name")[0].value = dataName["faceDataName"];
-    $("#body-data-name")[0].value = dataName["bodyDataName"];    
-    $("#sticks-data-name")[0].value = dataName["sticksDataName"];    
+    var pos = bodyFile.name.indexOf(".");
+    uploadedDataName["body"] = bodyFile.name.substr(0, pos);
+    var pos = faceFile.name.indexOf(".");
+    uploadedDataName["face"] = faceFile.name.substr(0, pos);
+    var pos = sticksFile.name.indexOf(".");
+    uploadedDataName["sticks"] = sticksFile.name.substr(0, pos);
+
+    skull = new Skull();
+
+    clearScene();
+    console.log("[INFO] Load data from client.", uploadedDataName);
+
+    readFileFromClient(bodyFile, "body", uploadedData, getMesh);
+    readFileFromClient(faceFile, "face", uploadedData, getMesh);
+    readFileFromClient(sticksFile, "sticks", uploadedData, getMesh);
+
+    $('#upload-data-modal').modal('hide');
 
 }
 
-function loadData() {
-    var faceDataName = $("#face-data-name")[0].value;
-    var bodyDataName = $("#body-data-name")[0].value;
-    var sticksDataName = $("#sticks-data-name")[0].value;
+function useDefaultData() {
 
-    location.href = "index.html?" + 
-        "faceDataName=" + faceDataName + "&" +
-        "bodyDataName=" + bodyDataName + "&" +
-        "sticksDataName=" + sticksDataName;
+    uploadedDataName["body"] = defaultDataName;
+    uploadedDataName["face"] = defaultDataName;
+    uploadedDataName["sticks"] = defaultDataName;
+
+    skull = new Skull();
+
+    clearScene();
+    console.log("[INFO] Load data from server.", uploadedDataName);
+    
+    readFileFromServer(defaultDataName, "body", uploadedData, getMesh);
+    readFileFromServer(defaultDataName, "face", uploadedData, getMesh);
+    readFileFromServer(defaultDataName, "sticks", uploadedData, getMesh);
+
+    $('#upload-data-modal').modal('hide');
 
 }
 
-function init_scene() {
+function getMesh() {
 
-    var canvas = $("#scene")[0];
+    if (uploadedData.body && uploadedData.body.state == 1) {
+        skull.initBody(uploadedData.body);
+    }
+
+    if (uploadedData.face && uploadedData.face.state == 1) {
+        skull.initFace(uploadedData.face);
+    }
+
+    if (uploadedData.sticks && uploadedData.sticks.state == 1) {
+        skull.initSticks(uploadedData.sticks);
+    }
+
+    var countState = 0;
+    for (index in uploadedData) {
+        if (uploadedData[index].state == 2) countState++;
+    }
+
+    if (countState == 3) {
+
+        for (index in uploadedData) {
+            uploadedData[index].state = 3;
+        }
+        
+        initScene();
+        animate();
+
+        init_stick_control();
+        console.log("[INFO] Init stick control done.");
+
+    }
+
+}
+
+function clearScene() {
+
+    $("#scene").remove();
+    $("#stats").remove();
+    cancelAnimationFrame(animationId);
+
+    console.log(" ");
+    console.log("[INFO] Clear scene.");
+
+    $("#save-sticks")[0].disabled = true;
+    $("#stick-index")[0].disabled = true;
+    $("#stick-length-range")[0].disabled = true;
+    $("#stick-length-input")[0].disabled = true;
+
+    $("#face-opacity-range")[0].disabled = true;
+    $("#face-opacity-input")[0].disabled = true;
+    $("#body-opacity-range")[0].disabled = true;
+    $("#body-opacity-input")[0].disabled = true;
+    $("#sticks-opacity-range")[0].disabled = true;
+    $("#sticks-opacity-input")[0].disabled = true;
+
+    console.log("[INFO] Disabled components.");
+
+}
+
+function initScene() {
+
+    var canvas = $("#scene-container")[0];
 
     renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(canvas.offsetWidth, canvas.offsetHeight);
     renderer.setClearColor(0x111111);
+    renderer.domElement.id = "scene";
     canvas.append(renderer.domElement);
 
     // camera
@@ -120,25 +183,18 @@ function init_scene() {
     // controls.update();
 
     // skull
-    skull = new Skull();
-    skull.init(dataName, function () {
-
-        scene.add(skull.bodyMesh);
-        scene.add(skull.faceMesh);
-        for (var i = 0; i < skull.sticksMesh.length; i++) {
-            scene.add(skull.sticksMesh[i]);
-        }
-        console.log("[INFO] Add skull done.");
-
-        init_stick_control();
-        console.log("[INFO] Init stick control done.");
-
-    });
+    scene.add(skull.bodyMesh);
+    scene.add(skull.faceMesh);
+    for (var i = 0; i < skull.sticksMesh.length; i++) {
+        scene.add(skull.sticksMesh[i]);
+    }
+    console.log("[INFO] Add skull elements done.");
 
     // stats
     stats = new Stats();
+    stats.domElement.id = "stats";
     stats.domElement.style.zIndex = 100;
-    $("#stats")[0].prepend(stats.domElement);
+    $("#stats-container")[0].prepend(stats.domElement);
 
 }
 
@@ -153,7 +209,7 @@ function onWindowResize() {
 
 function animate() {
 
-    requestAnimationFrame(animate);
+    animationId = requestAnimationFrame(animate);
 
     controls.update();
     stats.update();
@@ -220,9 +276,11 @@ function changeStickIndex() {
 
     var stickIndex = $("#stick-index")[0].value;
     var stickLengthRangeObj = $("#stick-length-range")[0];
+    var stickLengthInputObj = $("#stick-length-input")[0];
 
     console.log("Select stick ", stickIndex, ", Stick length ", skull.sticks[stickIndex].len);
     stickLengthRangeObj.value = skull.sticks[stickIndex].len;
+    stickLengthInputObj.value = skull.sticks[stickIndex].len;
 
     for (var i = 0; i < skull.sticks.length; i++) {
 

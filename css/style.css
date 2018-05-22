@@ -50,7 +50,7 @@ p {
     padding: 0;
 }
 
-#scene {
+#scene-container {
 	width: 960px;
     height: 600px;
     margin-bottom: 1rem;

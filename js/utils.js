@@ -13,7 +13,7 @@ function saveSticks() {
 
     var sticksStr = "";
     for (var i = 0; i < skull.sticks.length; i++) {
-        
+
         sticksStr += "Vertex " + (i * 2 + 1) + " " + skull.sticks[i].startPt.x + " " + skull.sticks[i].startPt.y + " " + skull.sticks[i].startPt.z + "\n";
         var endPt_x = skull.sticks[i].startPt.x + skull.sticks[i].vec.x * skull.sticks[i].len;
         var endPt_y = skull.sticks[i].startPt.y + skull.sticks[i].vec.y * skull.sticks[i].len;
@@ -28,10 +28,81 @@ function saveSticks() {
 
     // console.log(sticksStr);
 
-    var fileName = "face_" + dataName["faceDataName"] + " skull_" + dataName["bodyDataName"] + " sticks_" + dataName["sticksDataName"] + ".txt";
-    console.log(fileName);
+    var fileName = 
+        "body_" + uploadedDataName["body"] + " " +
+        "face_" + uploadedDataName["face"] + " " +
+        "sticks_" + uploadedDataName["sticks"] + ".cm";
+    console.log("[INFO] Save custom sticks.", fileName);
 
     var blob = new Blob([sticksStr], { type: "text/plain;charset=utf-8" });
     saveAs(blob, fileName);
+
+}
+
+function readFileFromClient(file, prefix, uploadedData, callback) {
+
+    var fileReader = new FileReader();
+    var loadingId = "#" + prefix + "-loading";
+
+    fileReader.onload = function () {
+        uploadedData[prefix] = {
+            "state": 1,
+            "txt": fileReader.result
+        };
+        $(loadingId).html(prefix + " loaded.");
+        callback();
+    };
+
+    fileReader.onprogress = function (data) {
+        if (data.lengthComputable) {
+            var progress = parseInt(data.loaded / data.total * 100);
+            $(loadingId).html(prefix + " " + progress + "%");
+        }
+    };
+
+    fileReader.onerror = function (err) {
+        console.error("[ERR] An error happened when loading " + prefix + ".", err);
+    }
+
+    fileReader.readAsText(file);
+
+}
+
+function readFileFromServer(dataName, prefix, uploadedData, callback) {
+
+    var filePath = "models/" + dataName + "_" + prefix;
+    if (prefix == "sticks") {
+        filePath += ".cm";
+    } else {
+        filePath += ".obj";
+    }
+    var loadingId = "#" + prefix + "-loading";
+    var fileLoader = new THREE.FileLoader();
+
+    fileLoader.load(
+
+        filePath, // resource URL
+
+        function (data) { // onLoad callback
+            uploadedData[prefix] = {
+                "state": 1,
+                "txt": data
+            };
+            $(loadingId).html(prefix + " loaded.");
+            callback();
+        },
+
+        function (xhr) { // onProgress callback
+            var progress = Math.floor(xhr.loaded / xhr.total * 100);
+            if (!isNaN(progress)) {
+                $(loadingId).html(prefix + " " + progress + "%");
+            }
+        },
+
+        function (err) { // onError callback
+            console.error("[ERR] An error happened when loading " + prefix + ".", err);
+        }
+
+    );
 
 }
