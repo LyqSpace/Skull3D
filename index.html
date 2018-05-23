@@ -59,9 +59,13 @@
 			</div>
 
 			<!-- Load Data -->
-			<button type="button" class="btn btn-outline-primary btn-sm" data-toggle="modal" data-target="#upload-data-modal">
-				Load Data
-			</button>
+			<div class="form-group">
+				<div class="form-row">
+					<button type="button" class="btn btn-outline-primary btn-sm col-md-12" data-toggle="modal" data-target="#upload-data-modal">
+						Load Data
+					</button>
+				</div>
+			</div>
 
 			<!-- Modal -->
 			<div class="modal fade" id="upload-data-modal" tabindex="-1" role="dialog" aria-labelledby="upload-data-modal-title" aria-hidden="true">
@@ -108,8 +112,38 @@
 				<div class="form-row">
 					<input type="range" class="custom-range form-control-sm col-md-9" min="0.1" max="30" step="0.1" id="stick-length-range" disabled="disabled"
 						onchange="changeStickLengthByRange()">
-					<input type="text" class="form-control form-control-sm col-md-3" id="stick-length-input" disabled="disabled" oninput="changeStickLengthByInput()"
-					/>
+					<input type="text" class="form-control form-control-sm col-md-3" id="stick-length-input" 
+						disabled="disabled" oninput="changeStickLengthByInput()">
+				</div>
+			</div>
+			<hr>
+
+			<!-- Camera -->
+			<div class="form-group">
+				<div class="form-row">
+					<label class="col-md-9">Camera Position</label>
+					<button type="button" class="btn btn-outline-primary btn-sm col-md-3" id="set-camera-position"
+						disabled="disabled" onclick="setCameraPosition()">Set</button>
+				</div>
+			</div>
+			<div class="form-group">
+				<div class="form-row">
+					<label class="col-md-1">X</label>
+					<input type="text" id="set-camera-x" class="form-control form-control-sm col-md-3">
+					<label class="col-md-1">Y</label>
+					<input type="text" id="set-camera-y" class="form-control form-control-sm col-md-3">
+					<label class="col-md-1">Z</label>
+					<input type="text" id="set-camera-z" class="form-control form-control-sm col-md-3">
+				</div>
+			</div>
+			<div class="form-group">
+				<div class="form-row">
+					<label class="col-md-1">X=</label>
+					<label id="camera-x" class="col-md-2"></label>
+					<label class="col-md-1 offset-md-1">Y=</label>
+					<label id="camera-y" class="col-md-2"></label>
+					<label class="col-md-1 offset-md-1">Z=</label>
+					<label id="camera-z" class="col-md-2"></label>
 				</div>
 			</div>
 			<hr>

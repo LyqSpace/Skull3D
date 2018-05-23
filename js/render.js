@@ -211,6 +211,10 @@ function animate() {
 
     animationId = requestAnimationFrame(animate);
 
+    $("#camera-x").html(Math.floor(camera.position.x * 10) / 10);
+    $("#camera-y").html(Math.floor(camera.position.y * 10) / 10);
+    $("#camera-z").html(Math.floor(camera.position.z * 10) / 10);
+    
     controls.update();
     stats.update();
     renderer.render(scene, camera);
