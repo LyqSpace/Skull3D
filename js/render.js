@@ -91,8 +91,8 @@ function getMesh() {
         initScene();
         animate();
 
-        init_stick_control();
-        console.log("[INFO] Init stick control done.");
+        initControls();
+        console.log("[INFO] Init controls done.");
 
     }
 
@@ -118,6 +118,8 @@ function clearScene() {
     $("#body-opacity-input")[0].disabled = true;
     $("#sticks-opacity-range")[0].disabled = true;
     $("#sticks-opacity-input")[0].disabled = true;
+
+    $("#set-camera-position")[0].disabled = true;
 
     console.log("[INFO] Disabled components.");
 
@@ -221,7 +223,7 @@ function animate() {
 
 }
 
-function init_stick_control() {
+function initControls() {
 
     var stickIndex = 0;
 
@@ -245,7 +247,11 @@ function init_stick_control() {
     skull.sticks[stickIndex].highlight = true;
     updateStickMesh(stickIndex);
 
+    // Save sticks
     $("#save-sticks")[0].disabled = false;
+
+    // Camera
+    $("#set-camera-position")[0].disabled = false;
 
     // Init face opacity
     var faceOpacityRangeObj = $("#face-opacity-range")[0];
@@ -299,6 +305,16 @@ function changeStickIndex() {
         }
 
     }
+
+}
+
+function setCameraPosition() {
+
+    var x = $("#set-camera-x")[0].value;
+    var y = $("#set-camera-y")[0].value;
+    var z = $("#set-camera-z")[0].value;
+
+    camera.position.set(x, y, z);
 
 }
 
