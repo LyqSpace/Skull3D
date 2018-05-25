@@ -112,6 +112,8 @@ function clearScene() {
     $("#stick-length-range")[0].disabled = true;
     $("#stick-length-input")[0].disabled = true;
 
+    $("#double-side")[0].disabled = true;
+
     $("#face-opacity-range")[0].disabled = true;
     $("#face-opacity-input")[0].disabled = true;
     $("#body-opacity-range")[0].disabled = true;
@@ -250,6 +252,9 @@ function initControls() {
     // Save sticks
     $("#save-sticks")[0].disabled = false;
 
+    // Render Side
+    $("#double-side")[0].disabled = false;
+
     // Camera
     $("#set-camera-position")[0].disabled = false;
 
@@ -282,6 +287,7 @@ function initControls() {
 
 }
 
+// Change Stick Length
 function changeStickIndex() {
 
     var stickIndex = $("#stick-index")[0].value;
@@ -308,17 +314,6 @@ function changeStickIndex() {
 
 }
 
-function setCameraPosition() {
-
-    var x = $("#set-camera-x")[0].value;
-    var y = $("#set-camera-y")[0].value;
-    var z = $("#set-camera-z")[0].value;
-
-    camera.position.set(x, y, z);
-
-}
-
-// Change Stick Length
 function updateStickMesh(stickIndex) {
 
     var newStickMesh = getStickMesh(skull.sticks[stickIndex], skull.sticksOpacity);
@@ -374,6 +369,33 @@ function changeStickLengthByInput() {
 
     skull.sticks[stickIndex].len = stickLength;
     updateStickMesh(stickIndex);
+
+}
+
+function setCameraPosition() {
+
+    var x = $("#set-camera-x")[0].value;
+    var y = $("#set-camera-y")[0].value;
+    var z = $("#set-camera-z")[0].value;
+
+    camera.position.set(x, y, z);
+
+}
+
+function setRenderSide() {
+    
+    var doubleSide = $("#double-side")[0].checked;
+
+    if (doubleSide) {
+        skull.renderSide = THREE.DoubleSide;
+    } else {
+        skull.renderSide = THREE.FrontSide;
+    }
+
+    skull.faceMesh.material.side = skull.renderSide;
+    skull.bodyMesh.material.side = skull.renderSide;
+
+    console.log("Change render side as", (doubleSide) ? "DoubleSide" : "SingleSide");
 
 }
 

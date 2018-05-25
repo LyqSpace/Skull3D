@@ -61,8 +61,11 @@
 			<!-- Load Data -->
 			<div class="form-group">
 				<div class="form-row">
-					<button type="button" class="btn btn-outline-primary btn-sm col-md-12" data-toggle="modal" data-target="#upload-data-modal">
+					<button type="button" class="btn btn-outline-primary btn-sm col-md-5" data-toggle="modal" data-target="#upload-data-modal">
 						Load Data
+					</button>
+					<button type="button" class="btn btn-outline-primary btn-sm col-md-5 offset-md-2" data-toggle="modal" data-target="#upload-data-modal">
+						Screenshot
 					</button>
 				</div>
 			</div>
@@ -100,10 +103,10 @@
 			<!-- Sticks -->
 			<div class="form-group">
 				<div class="form-row">
-					<label class="col-md-3" for="stick-index">Stick</label>
-					<select class="custom-select form-control-sm col-md-3" id="stick-index" disabled="disabled" onchange="changeStickIndex()">
+					<label class="col-md-4" for="stick-index">Stick Id</label>
+					<select class="custom-select form-control-sm col-md-3 offset-md-1" id="stick-index" disabled="disabled" onchange="changeStickIndex()">
 					</select>
-					<button type="button" class="btn btn-outline-primary btn-sm col-md-3 offset-md-2" id="save-sticks" 
+					<button type="button" class="btn btn-outline-primary btn-sm col-md-3 offset-md-1" id="save-sticks" 
 						disabled="disabled" onclick="saveSticks()">Save</button>
 				</div>
 			</div>
@@ -121,22 +124,15 @@
 			<!-- Camera -->
 			<div class="form-group">
 				<div class="form-row">
-					<label class="col-md-9">Camera Position</label>
-					<button type="button" class="btn btn-outline-primary btn-sm col-md-3" id="set-camera-position"
+						<label class="col-md-12">Camera Position (X, Y, Z)</label>
+				</div>
+				<div class="form-row">
+					<input type="text" id="set-camera-x" class="form-control form-control-sm col-md-2">
+					<input type="text" id="set-camera-y" class="form-control form-control-sm col-md-2 offset-md-1">
+					<input type="text" id="set-camera-z" class="form-control form-control-sm col-md-2 offset-md-1">
+					<button type="button" class="btn btn-outline-primary btn-sm col-md-3 offset-md-1" id="set-camera-position"
 						disabled="disabled" onclick="setCameraPosition()">Set</button>
 				</div>
-			</div>
-			<div class="form-group">
-				<div class="form-row">
-					<label class="col-md-1">X</label>
-					<input type="text" id="set-camera-x" class="form-control form-control-sm col-md-3">
-					<label class="col-md-1">Y</label>
-					<input type="text" id="set-camera-y" class="form-control form-control-sm col-md-3">
-					<label class="col-md-1">Z</label>
-					<input type="text" id="set-camera-z" class="form-control form-control-sm col-md-3">
-				</div>
-			</div>
-			<div class="form-group">
 				<div class="form-row">
 					<label class="col-md-1">X=</label>
 					<label id="camera-x" class="col-md-2"></label>
@@ -147,6 +143,15 @@
 				</div>
 			</div>
 			<hr>
+
+			<!-- Side -->
+			<div class="form-group">
+				<div class="custom-control custom-checkbox form-control-sm">
+					<input type="checkbox" class="custom-control-input" id="double-side" 
+						disabled="disabled" onchange="setRenderSide()">
+					<label class="custom-control-label" for="double-side">Render as Double Side</label>
+				</div>
+			</div>
 
 			<!-- Opacity -->
 			<div class="form-group">

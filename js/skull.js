@@ -2,9 +2,10 @@ var Skull = function () {
 
     var object = this;
 
-    object.faceOpacity = 0.5;
     object.bodyOpacity = 1;
+    object.faceOpacity = 0.9;
     object.sticksOpacity = 1;
+    object.renderSide = THREE.FrontSide;
 
     object.initBody = function (data) {
 
@@ -35,7 +36,7 @@ var Skull = function () {
 
     // functions
     function setBodyProperties() {
-        object.bodyMesh.material.side = THREE.DoubleSide;
+        object.bodyMesh.material.side = object.renderSide;
         object.bodyMesh.material.color.set(0xbbaaaa);
         object.bodyMesh.material.transparent = true;
         object.bodyMesh.material.opacity = object.bodyOpacity;
@@ -44,7 +45,7 @@ var Skull = function () {
     }
 
     function setFaceProperties() {
-        object.faceMesh.material.side = THREE.DoubleSide;
+        object.faceMesh.material.side = object.renderSide;
         object.faceMesh.material.color.set(0xccaa99);
         object.faceMesh.material.transparent = true;
         object.faceMesh.material.opacity = object.faceOpacity;
