@@ -54,7 +54,7 @@ function useDefaultData() {
 
     clearScene();
     console.log("[INFO] Load data from server.", uploadedDataName);
-    
+
     readFileFromServer(defaultDataName, "body", uploadedData, getMesh);
     readFileFromServer(defaultDataName, "face", uploadedData, getMesh);
     readFileFromServer(defaultDataName, "sticks", uploadedData, getMesh);
@@ -87,7 +87,7 @@ function getMesh() {
         for (index in uploadedData) {
             uploadedData[index].state = 3;
         }
-        
+
         initScene();
         animate();
 
@@ -106,6 +106,8 @@ function clearScene() {
 
     console.log(" ");
     console.log("[INFO] Clear scene.");
+
+    $("#screenshot-btn")[0].disabled = true;
 
     $("#save-sticks")[0].disabled = true;
     $("#stick-index")[0].disabled = true;
@@ -131,7 +133,10 @@ function initScene() {
 
     var canvas = $("#scene-container")[0];
 
-    renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer = new THREE.WebGLRenderer({
+        antialias: true,
+        preserveDrawingBuffer: true
+    });
     renderer.setSize(canvas.offsetWidth, canvas.offsetHeight);
     renderer.setClearColor(0x111111);
     renderer.domElement.id = "scene";
@@ -218,7 +223,7 @@ function animate() {
     $("#camera-x").html(Math.floor(camera.position.x * 10) / 10);
     $("#camera-y").html(Math.floor(camera.position.y * 10) / 10);
     $("#camera-z").html(Math.floor(camera.position.z * 10) / 10);
-    
+
     controls.update();
     stats.update();
     renderer.render(scene, camera);
@@ -236,6 +241,8 @@ function initControls() {
         stickIndexObj.append(optionObj);
     }
     stickIndexObj.value = 0;
+
+    $("#screenshot-btn")[0].disabled = false;
 
     // Init stick length
     var stickLengthRangeObj = $("#stick-length-range")[0];
@@ -383,7 +390,7 @@ function setCameraPosition() {
 }
 
 function setRenderSide() {
-    
+
     var doubleSide = $("#double-side")[0].checked;
 
     if (doubleSide) {

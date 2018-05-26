@@ -25,13 +25,13 @@
 	<script type="text/javascript" src="js/lib/stats.min.js"></script>
 
 	<!-- FileSaver.js -->
+	<script type="text/javascript" src="js/lib/canvas-toBlob.js"></script>
 	<script type="text/javascript" src="js/lib/FileSaver.min.js"></script>
 
 	<!-- custom js -->
 	<script type="text/javascript" src="js/utils.js"></script>
 	<script type="text/javascript" src="js/skull.js"></script>
 	<script type="text/javascript" src="js/render.js"></script>
-
 
 </head>
 
@@ -64,13 +64,14 @@
 					<button type="button" class="btn btn-outline-primary btn-sm col-md-5" data-toggle="modal" data-target="#upload-data-modal">
 						Load Data
 					</button>
-					<button type="button" class="btn btn-outline-primary btn-sm col-md-5 offset-md-2" data-toggle="modal" data-target="#upload-data-modal">
+					<button type="button" class="btn btn-outline-primary btn-sm col-md-5 offset-md-2" data-toggle="modal" data-target="#screenshot-modal"
+					 id="screenshot-btn" disabled="disabled">
 						Screenshot
 					</button>
 				</div>
 			</div>
 
-			<!-- Modal -->
+			<!-- Load Data Modal -->
 			<div class="modal fade" id="upload-data-modal" tabindex="-1" role="dialog" aria-labelledby="upload-data-modal-title" aria-hidden="true">
 				<div class="modal-dialog" role="document">
 					<div class="modal-content">
@@ -97,7 +98,51 @@
 					</div>
 				</div>
 			</div>
-				
+
+			<!-- Screenshot Modal -->
+			<div class="modal fade" id="screenshot-modal" tabindex="-1" role="dialog" aria-labelledby="screenshot-modal-title" aria-hidden="true">
+				<div class="modal-dialog" role="document">
+					<div class="modal-content">
+						<div class="modal-header">
+							<h5 class="modal-title" id="screenshot-modal-title">Screenshot</h5>
+							<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+								<span aria-hidden="true">&times;</span>
+							</button>
+						</div>
+						<div class="modal-body">
+							<div class="form-row">
+								<label class="col-md-7">W:960 x H:600 px</label>
+								<button type="button" class="btn btn-primary col-md-5" onclick="saveSceneFullSize()">Save Full Size</button>
+							</div>
+							<br>
+							<div class="form-row">
+								<label class="col-md-7">W:600 x H:600 px</label>
+								<button type="button" class="btn btn-primary col-md-5" onclick="saveSceneSquareSize()">Save Square Size</button>
+							</div>
+							<br>
+							<div class="form-row">
+								<div class="col-md-7">
+									<div class="form-row">
+										<label class="col-md-2">Left:</label>
+										<input type="text" class="form-control col-md-2" id="screenshot-left">
+										<label class="col-md-2 offset-md-1">Top:</label>
+										<input type="text" class="form-control col-md-2" id="screenshot-top">
+									</div>
+									<br>
+									<div class="form-row">
+										<label class="col-md-2">Width:</label>
+										<input type="text" class="form-control col-md-2" id="screenshot-width">
+										<label class="col-md-2 offset-md-1">Height:</label>
+										<input type="text" class="form-control col-md-2" id="screenshot-height">
+									</div>
+								</div>
+								<button type="button" class="btn btn-primary col-md-5" onclick="saveSceneCustomSize()">Save Custom Size</button>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+
 			<hr>
 
 			<!-- Sticks -->
@@ -106,17 +151,15 @@
 					<label class="col-md-4" for="stick-index">Stick Id</label>
 					<select class="custom-select form-control-sm col-md-3 offset-md-1" id="stick-index" disabled="disabled" onchange="changeStickIndex()">
 					</select>
-					<button type="button" class="btn btn-outline-primary btn-sm col-md-3 offset-md-1" id="save-sticks" 
-						disabled="disabled" onclick="saveSticks()">Save</button>
+					<button type="button" class="btn btn-outline-primary btn-sm col-md-3 offset-md-1" id="save-sticks" disabled="disabled" onclick="saveSticks()">Save</button>
 				</div>
 			</div>
 			<div class="form-group">
 				<label for="stick-length-range">Stick Length [0,30]</label>
 				<div class="form-row">
 					<input type="range" class="custom-range form-control-sm col-md-9" min="0.1" max="30" step="0.1" id="stick-length-range" disabled="disabled"
-						onchange="changeStickLengthByRange()">
-					<input type="text" class="form-control form-control-sm col-md-3" id="stick-length-input" 
-						disabled="disabled" oninput="changeStickLengthByInput()">
+					 onchange="changeStickLengthByRange()">
+					<input type="text" class="form-control form-control-sm col-md-3" id="stick-length-input" disabled="disabled" oninput="changeStickLengthByInput()">
 				</div>
 			</div>
 			<hr>
@@ -124,14 +167,14 @@
 			<!-- Camera -->
 			<div class="form-group">
 				<div class="form-row">
-						<label class="col-md-12">Camera Position (X, Y, Z)</label>
+					<label class="col-md-12">Camera Position (X, Y, Z)</label>
 				</div>
 				<div class="form-row">
 					<input type="text" id="set-camera-x" class="form-control form-control-sm col-md-2">
 					<input type="text" id="set-camera-y" class="form-control form-control-sm col-md-2 offset-md-1">
 					<input type="text" id="set-camera-z" class="form-control form-control-sm col-md-2 offset-md-1">
-					<button type="button" class="btn btn-outline-primary btn-sm col-md-3 offset-md-1" id="set-camera-position"
-						disabled="disabled" onclick="setCameraPosition()">Set</button>
+					<button type="button" class="btn btn-outline-primary btn-sm col-md-3 offset-md-1" id="set-camera-position" disabled="disabled"
+					 onclick="setCameraPosition()">Set</button>
 				</div>
 				<div class="form-row">
 					<label class="col-md-1">X=</label>
@@ -147,8 +190,7 @@
 			<!-- Side -->
 			<div class="form-group">
 				<div class="custom-control custom-checkbox form-control-sm">
-					<input type="checkbox" class="custom-control-input" id="double-side" 
-						disabled="disabled" onchange="setRenderSide()">
+					<input type="checkbox" class="custom-control-input" id="double-side" disabled="disabled" onchange="setRenderSide()">
 					<label class="custom-control-label" for="double-side">Render as Double Side</label>
 				</div>
 			</div>
@@ -158,21 +200,21 @@
 				<label for="body-opacity-range">Skull Opacity [0,1]</label>
 				<div class="form-row">
 					<input type="range" class="custom-range form-control-sm col-md-9" min="0" max="1" step="0.05" id="body-opacity-range" disabled="disabled"
-						onchange="changeBodyOpacityByRange()">
+					 onchange="changeBodyOpacityByRange()">
 					<input type="text" class="form-control form-control-sm col-md-3" id="body-opacity-input" disabled="disabled" oninput="changeBodyOpacityByInput()"
 					/>
 				</div>
 				<label for="face-opacity-range">Face Opacity [0,1]</label>
 				<div class="form-row">
 					<input type="range" class="custom-range form-control-sm col-md-9" min="0" max="1" step="0.05" id="face-opacity-range" disabled="disabled"
-						onchange="changeFaceOpacityByRange()">
+					 onchange="changeFaceOpacityByRange()">
 					<input type="text" class="form-control form-control-sm col-md-3" id="face-opacity-input" disabled="disabled" oninput="changeFaceOpacityByInput()"
 					/>
 				</div>
 				<label for="sticks-opacity-range">Sticks Opacity [0,1]</label>
 				<div class="form-row">
 					<input type="range" class="custom-range form-control-sm col-md-9" min="0" max="1" step="0.05" id="sticks-opacity-range" disabled="disabled"
-						onchange="changeSticksOpacityByRange()">
+					 onchange="changeSticksOpacityByRange()">
 					<input type="text" class="form-control form-control-sm col-md-3" id="sticks-opacity-input" disabled="disabled" oninput="changeSticksOpacityByInput()"
 					/>
 				</div>
