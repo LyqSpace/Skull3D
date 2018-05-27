@@ -3,7 +3,7 @@ var Skull = function () {
     var object = this;
 
     object.bodyOpacity = 1;
-    object.faceOpacity = 0.9;
+    object.faceOpacity = 0.85;
     object.sticksOpacity = 1;
     object.renderSide = THREE.FrontSide;
 

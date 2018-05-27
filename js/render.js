@@ -2,9 +2,14 @@ var uploadedData = {};
 var uploadedDataName = {};
 var defaultDataName = "european";
 
-var scale = 120;
+var scale = 130;
 var camera, controls, scene, renderer, stats, animationId;
 var skull;
+var cameraDefaultPosition = {
+    "x": -300,
+    "y": -230,
+    "z": 70
+}
 
 $(document).ready(function () {
 
@@ -15,30 +20,67 @@ $(document).ready(function () {
 // functions
 function uploadData() {
 
+    clearScene();
+
     var bodyFile = $("#body-file")[0].files[0];
     var faceFile = $("#face-file")[0].files[0];
     var sticksFile = $("#sticks-file")[0].files[0];
 
-    if (bodyFile == undefined || faceFile == undefined || sticksFile == undefined) {
-        console.log("[ERR]", bodyFile, faceFile, sticksFile, "can't be undefined.");
-        return;
+    skull = new Skull();
+    uploadedData = {};
+    uploadedDataName = {};
+
+    console.log(bodyFile, faceFile, sticksFile);
+
+    if (bodyFile == undefined) {
+
+        uploadedData["body"] = {
+            "state": 3
+        };
+        getMesh();
+
+    } else {
+
+        var pos = bodyFile.name.indexOf(".");
+        uploadedDataName["body"] = bodyFile.name.substr(0, pos);
+
+        readFileFromClient(bodyFile, "body", uploadedData, getMesh);
+
     }
 
-    var pos = bodyFile.name.indexOf(".");
-    uploadedDataName["body"] = bodyFile.name.substr(0, pos);
-    var pos = faceFile.name.indexOf(".");
-    uploadedDataName["face"] = faceFile.name.substr(0, pos);
-    var pos = sticksFile.name.indexOf(".");
-    uploadedDataName["sticks"] = sticksFile.name.substr(0, pos);
+    if (faceFile == undefined) {
 
-    skull = new Skull();
+        uploadedData["face"] = {
+            "state": 3
+        };
+        getMesh();
 
-    clearScene();
+    } else {
+
+        var pos = faceFile.name.indexOf(".");
+        uploadedDataName["face"] = faceFile.name.substr(0, pos);
+
+        readFileFromClient(faceFile, "face", uploadedData, getMesh);
+
+    }
+
+    if (sticksFile == undefined) {
+
+        uploadedData["sticks"] = {
+            "state": 3
+        };
+        getMesh();
+
+    } else {
+
+        var pos = sticksFile.name.indexOf(".");
+        uploadedDataName["sticks"] = sticksFile.name.substr(0, pos);
+
+        readFileFromClient(sticksFile, "sticks", uploadedData, getMesh);
+
+    }
+
     console.log("[INFO] Load data from client.", uploadedDataName);
-
-    readFileFromClient(bodyFile, "body", uploadedData, getMesh);
-    readFileFromClient(faceFile, "face", uploadedData, getMesh);
-    readFileFromClient(sticksFile, "sticks", uploadedData, getMesh);
 
     $('#upload-data-modal').modal('hide');
 
@@ -79,13 +121,13 @@ function getMesh() {
 
     var countState = 0;
     for (index in uploadedData) {
-        if (uploadedData[index].state == 2) countState++;
+        if (uploadedData[index].state >= 2) countState++;
     }
 
     if (countState == 3) {
 
         for (index in uploadedData) {
-            uploadedData[index].state = 3;
+            if (uploadedData[index].state == 2) uploadedData[index].state = 4;
         }
 
         initScene();
@@ -144,7 +186,7 @@ function initScene() {
 
     // camera
     camera = new THREE.PerspectiveCamera(45, canvas.offsetWidth / canvas.offsetHeight, 0.01, 4000);
-    camera.position.set(-scale * 3, -scale, 0);
+    camera.position.set(cameraDefaultPosition.x, cameraDefaultPosition.y, cameraDefaultPosition.z);
 
     scene = new THREE.Scene();
 
@@ -191,12 +233,15 @@ function initScene() {
     controls.target.set(0, -scale, 0);
     // controls.update();
 
-    // skull
-    scene.add(skull.bodyMesh);
-    scene.add(skull.faceMesh);
-    for (var i = 0; i < skull.sticksMesh.length; i++) {
-        scene.add(skull.sticksMesh[i]);
+    // Add skull
+    if (uploadedData["body"].state == 4) scene.add(skull.bodyMesh);
+    if (uploadedData["face"].state == 4) scene.add(skull.faceMesh);
+    if (uploadedData["sticks"].state == 4) {
+        for (var i = 0; i < skull.sticksMesh.length; i++) {
+            scene.add(skull.sticksMesh[i]);
+        }
     }
+
     console.log("[INFO] Add skull elements done.");
 
     // stats
@@ -232,32 +277,7 @@ function animate() {
 
 function initControls() {
 
-    var stickIndex = 0;
-
-    var stickIndexObj = $("#stick-index")[0];
-    stickIndexObj.disabled = false;
-    for (var i = 0; i < skull.sticks.length; i++) {
-        var optionObj = $("<option value=\"" + i.toString() + "\">" + i.toString() + "</option>")[0];
-        stickIndexObj.append(optionObj);
-    }
-    stickIndexObj.value = 0;
-
     $("#screenshot-btn")[0].disabled = false;
-
-    // Init stick length
-    var stickLengthRangeObj = $("#stick-length-range")[0];
-    stickLengthRangeObj.disabled = false;
-    stickLengthRangeObj.value = skull.sticks[stickIndex].len;
-
-    var stickLengthInputObj = $("#stick-length-input")[0];
-    stickLengthInputObj.disabled = false;
-    stickLengthInputObj.value = skull.sticks[stickIndex].len;
-
-    skull.sticks[stickIndex].highlight = true;
-    updateStickMesh(stickIndex);
-
-    // Save sticks
-    $("#save-sticks")[0].disabled = false;
 
     // Render Side
     $("#double-side")[0].disabled = false;
@@ -265,32 +285,73 @@ function initControls() {
     // Camera
     $("#set-camera-position")[0].disabled = false;
 
-    // Init face opacity
-    var faceOpacityRangeObj = $("#face-opacity-range")[0];
-    faceOpacityRangeObj.disabled = false;
-    faceOpacityRangeObj.value = skull.faceOpacity;
+    if (uploadedData["sticks"].state == 4) {
 
-    var faceOpacityInputObj = $("#face-opacity-input")[0];
-    faceOpacityInputObj.disabled = false;
-    faceOpacityInputObj.value = skull.faceOpacity;
+        var stickIndex = 0;
 
-    // Init body opacity
-    var bodyOpacityRangeObj = $("#body-opacity-range")[0];
-    bodyOpacityRangeObj.disabled = false;
-    bodyOpacityRangeObj.value = skull.bodyOpacity;
+        var stickIndexObj = $("#stick-index")[0];
+        stickIndexObj.disabled = false;
+        for (var i = 0; i < skull.sticks.length; i++) {
+            var optionObj = $("<option value=\"" + i.toString() + "\">" + i.toString() + "</option>")[0];
+            stickIndexObj.append(optionObj);
+        }
+        stickIndexObj.value = 0;
 
-    var bodyOpacityInputObj = $("#body-opacity-input")[0];
-    bodyOpacityInputObj.disabled = false;
-    bodyOpacityInputObj.value = skull.bodyOpacity;
+        // Init stick length
+        var stickLengthRangeObj = $("#stick-length-range")[0];
+        stickLengthRangeObj.disabled = false;
+        stickLengthRangeObj.value = skull.sticks[stickIndex].len;
 
-    // Init sticks opacity
-    var sticksOpacityRangeObj = $("#sticks-opacity-range")[0];
-    sticksOpacityRangeObj.disabled = false;
-    sticksOpacityRangeObj.value = skull.sticksOpacity;
+        var stickLengthInputObj = $("#stick-length-input")[0];
+        stickLengthInputObj.disabled = false;
+        stickLengthInputObj.value = skull.sticks[stickIndex].len;
 
-    var sticksOpacityInputObj = $("#sticks-opacity-input")[0];
-    sticksOpacityInputObj.disabled = false;
-    sticksOpacityInputObj.value = skull.sticksOpacity;
+        skull.sticks[stickIndex].highlight = true;
+        updateStickMesh(stickIndex);
+
+        // Save sticks
+        $("#save-sticks")[0].disabled = false;
+
+    }
+
+    if (uploadedData["face"].state == 4) {
+
+        // Init face opacity
+        var faceOpacityRangeObj = $("#face-opacity-range")[0];
+        faceOpacityRangeObj.disabled = false;
+        faceOpacityRangeObj.value = skull.faceOpacity;
+
+        var faceOpacityInputObj = $("#face-opacity-input")[0];
+        faceOpacityInputObj.disabled = false;
+        faceOpacityInputObj.value = skull.faceOpacity;
+
+    }
+
+    if (uploadedData["body"].state == 4) {
+
+        // Init body opacity
+        var bodyOpacityRangeObj = $("#body-opacity-range")[0];
+        bodyOpacityRangeObj.disabled = false;
+        bodyOpacityRangeObj.value = skull.bodyOpacity;
+
+        var bodyOpacityInputObj = $("#body-opacity-input")[0];
+        bodyOpacityInputObj.disabled = false;
+        bodyOpacityInputObj.value = skull.bodyOpacity;
+
+    }
+
+    if (uploadedData["sticks"].state == 4) {
+
+        // Init sticks opacity
+        var sticksOpacityRangeObj = $("#sticks-opacity-range")[0];
+        sticksOpacityRangeObj.disabled = false;
+        sticksOpacityRangeObj.value = skull.sticksOpacity;
+
+        var sticksOpacityInputObj = $("#sticks-opacity-input")[0];
+        sticksOpacityInputObj.disabled = false;
+        sticksOpacityInputObj.value = skull.sticksOpacity;
+
+    }
 
 }
 
@@ -399,8 +460,13 @@ function setRenderSide() {
         skull.renderSide = THREE.FrontSide;
     }
 
-    skull.faceMesh.material.side = skull.renderSide;
-    skull.bodyMesh.material.side = skull.renderSide;
+    if (uploadedData["face"].state == 4) {
+        skull.faceMesh.material.side = skull.renderSide;
+    }
+    
+    if (uploadedData["body"].state == 4) {
+        skull.bodyMesh.material.side = skull.renderSide;
+    }
 
     console.log("Change render side as", (doubleSide) ? "DoubleSide" : "SingleSide");
 
