@@ -30,8 +30,6 @@ function uploadData() {
     uploadedData = {};
     uploadedDataName = {};
 
-    console.log(bodyFile, faceFile, sticksFile);
-
     if (bodyFile == undefined) {
 
         uploadedData["body"] = {
