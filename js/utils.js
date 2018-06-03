@@ -7,6 +7,110 @@ function getParam(paramName) {
     return paramValue == "" && (paramValue = null), paramValue
 }
 
+function uploadData() {
+
+    $('#upload-data-modal').modal('hide');
+
+    clearScene();
+
+    var bodyFile = $("#body-file")[0].files[0];
+    var faceFile = $("#face-file")[0].files[0];
+    var sticksFile = $("#sticks-file")[0].files[0];
+
+    skull = new Skull();
+    uploadedData = {};
+    uploadedDataName = {};
+
+    if (bodyFile == undefined) {
+
+        uploadedData["body"] = {
+            "state": 3
+        };
+
+    } else {
+
+        var pos = bodyFile.name.indexOf(".");
+        uploadedDataName["body"] = bodyFile.name.substr(0, pos);
+
+        readFileFromClient(bodyFile, "body", uploadedData, getMesh);
+
+    }
+
+    if (faceFile == undefined) {
+
+        uploadedData["face"] = {
+            "state": 3
+        };
+
+    } else {
+
+        var pos = faceFile.name.indexOf(".");
+        uploadedDataName["face"] = faceFile.name.substr(0, pos);
+
+        readFileFromClient(faceFile, "face", uploadedData, getMesh);
+
+    }
+
+    if (sticksFile == undefined) {
+
+        uploadedData["sticks"] = {
+            "state": 3
+        };
+
+    } else {
+
+        var pos = sticksFile.name.indexOf(".");
+        uploadedDataName["sticks"] = sticksFile.name.substr(0, pos);
+
+        readFileFromClient(sticksFile, "sticks", uploadedData, getMesh);
+
+    }
+
+    getMesh();
+    
+    console.log("[INFO] Load data from client.", uploadedDataName);
+
+}
+
+function useDefaultData() {
+
+    $('#upload-data-modal').modal('hide');
+
+    uploadedDataName["body"] = defaultDataName;
+    uploadedDataName["face"] = defaultDataName;
+    uploadedDataName["sticks"] = defaultDataName;
+
+    skull = new Skull();
+    uploadedData = {};
+
+    clearScene();
+    console.log("[INFO] Load data from server.", uploadedDataName);
+
+    readFileFromServer(defaultDataName + "_body.obj", "body", uploadedData, getMesh);
+    readFileFromServer(defaultDataName + "_face.obj", "face", uploadedData, getMesh);
+    readFileFromServer(defaultDataName + "_sticks.cm", "sticks", uploadedData, getMesh);
+
+}
+
+function saveFrames() {
+
+    $('#upload-data-modal').modal('hide');
+
+    skull = new Skull();
+
+    uploadedData = {
+        "face": {"state": 3},
+        "sticks": {"state": 3}
+    };
+
+    uploadedDataName = {
+        "body": "skull"
+    };
+    
+    readFileFromServer("animation/" + uploadedDataName["body"] + ".obj", "body", uploadedData, getFrame);
+
+}
+
 function saveSticks() {
 
     console.log("[INFO] Save sticks.");
@@ -70,12 +174,7 @@ function readFileFromClient(file, prefix, uploadedData, callback) {
 
 function readFileFromServer(dataName, prefix, uploadedData, callback) {
 
-    var filePath = "models/" + dataName + "_" + prefix;
-    if (prefix == "sticks") {
-        filePath += ".cm";
-    } else {
-        filePath += ".obj";
-    }
+    var filePath = "models/" + dataName;
     var loadingId = "#" + prefix + "-loading";
     var fileLoader = new THREE.FileLoader();
 
@@ -100,7 +199,7 @@ function readFileFromServer(dataName, prefix, uploadedData, callback) {
         },
 
         function (err) { // onError callback
-            console.error("[ERR] An error happened when loading " + prefix + ".", err);
+            console.error("[ERR] An error happened when loading " + prefix + ".", filePath, err);
         }
 
     );
@@ -119,7 +218,7 @@ function saveSceneFullSize() {
 
 }
 
-function saveSceneSquareSize() {
+function saveSceneSquareSize(fileName = null) {
 
     var scene = $("#scene")[0];
 
@@ -130,13 +229,13 @@ function saveSceneSquareSize() {
         "height": scene.height
     };
 
-    saveSceneByRect(rect);
+    saveSceneByRect(rect, fileName);
 
     $('#screenshot-modal').modal('hide');
 
 }
 
-function saveSceneCustomSize() {
+function saveSceneCustomSize(fileName = null) {
 
     var rect = {
         "left": $("#screenshot-left")[0].value,
@@ -145,13 +244,13 @@ function saveSceneCustomSize() {
         "height": $("#screenshot-height")[0].value
     };
 
-    saveSceneByRect(rect);
+    saveSceneByRect(rect, fileName);
 
     $('#screenshot-modal').modal('hide');
 
 }
 
-function saveSceneByRect(rect) {
+function saveSceneByRect(rect, fileName = null) {
 
     var scene = $("#scene")[0];
     var img = new Image();
@@ -159,7 +258,10 @@ function saveSceneByRect(rect) {
     var ctx = canvas.getContext("2d");
     var right = parseInt(rect.left) + parseInt(rect.width);
     var bottom = parseInt(rect.top) + parseInt(rect.height);
-    var fileName = "Skull 3D - " + rect.left + "x" + rect.top + " - " + right + "x" + bottom + ".png";
+
+    if (fileName == null) {
+        fileName = "Skull 3D - " + rect.left + "x" + rect.top + " - " + right + "x" + bottom + ".png";
+    }
 
     canvas.width = rect.width;
     canvas.height = rect.height;

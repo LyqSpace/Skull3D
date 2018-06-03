@@ -9,7 +9,13 @@ var cameraDefaultPosition = {
     "x": -300,
     "y": -230,
     "z": 70
-}
+};
+
+var cameraDefaultTarget = {
+    "x": 0,
+    "y": -scale,
+    "z": 0
+};
 
 $(document).ready(function () {
 
@@ -18,88 +24,79 @@ $(document).ready(function () {
 });
 
 // functions
-function uploadData() {
 
-    clearScene();
+function getFrame() {
 
-    var bodyFile = $("#body-file")[0].files[0];
-    var faceFile = $("#face-file")[0].files[0];
-    var sticksFile = $("#sticks-file")[0].files[0];
-
-    skull = new Skull();
-    uploadedData = {};
-    uploadedDataName = {};
-
-    if (bodyFile == undefined) {
-
-        uploadedData["body"] = {
-            "state": 3
-        };
-        getMesh();
-
-    } else {
-
-        var pos = bodyFile.name.indexOf(".");
-        uploadedDataName["body"] = bodyFile.name.substr(0, pos);
-
-        readFileFromClient(bodyFile, "body", uploadedData, getMesh);
-
+    if (uploadedData.body && uploadedData.body.state == 1) {
+        skull.initBody(uploadedData.body);
     }
 
-    if (faceFile == undefined) {
-
-        uploadedData["face"] = {
-            "state": 3
-        };
-        getMesh();
-
-    } else {
-
-        var pos = faceFile.name.indexOf(".");
-        uploadedDataName["face"] = faceFile.name.substr(0, pos);
-
-        readFileFromClient(faceFile, "face", uploadedData, getMesh);
-
+    var countState = 0;
+    for (index in uploadedData) {
+        if (uploadedData[index].state >= 2) countState++;
     }
 
-    if (sticksFile == undefined) {
+    if (countState == 3) {
 
-        uploadedData["sticks"] = {
-            "state": 3
+        clearScene();
+
+        skull.faceOpacity = 1;
+
+        cameraDefaultTarget = {
+            "x": 0, 
+            "y": -10,
+            "z": 0
         };
-        getMesh();
 
-    } else {
+        cameraDefaultPosition = {
+            "x": -120,
+            "y": 20,
+            "z": 340
+        };
 
-        var pos = sticksFile.name.indexOf(".");
-        uploadedDataName["sticks"] = sticksFile.name.substr(0, pos);
+        uploadedData.body.state = 4;
 
-        readFileFromClient(sticksFile, "sticks", uploadedData, getMesh);
+        initScene();
+
+        controls.update();
+
+        var firstIdx = parseInt($("#first-frame-idx")[0].value);
+        var lastIdx = parseInt($("#last-frame-idx")[0].value);
+        var frameIdx = firstIdx;
+
+        uploadedDataName["face"] = "frame-" + frameIdx;
+        uploadedData["face"] = null;
+
+        readFileFromServer("animation/" + uploadedDataName["face"] + ".obj", "face", uploadedData, saveFrame);
+
+        function saveFrame() {
+
+            // current frame
+            console.log("[INFO] Save", frameIdx, "frame.");
+
+            skull.initFace(uploadedData.face);
+            scene.add(skull.faceMesh);
+
+            renderer.render(scene, camera);
+
+            saveSceneSquareSize(uploadedDataName["face"] + ".png");
+
+            // next frame
+            frameIdx = frameIdx + 1;
+            if (frameIdx > lastIdx) return;
+
+            uploadedDataName["face"] = "frame-" + frameIdx;
+            uploadedData["face"] = null;
+
+            scene.remove(skull.faceMesh);
+            skull.faceMesh.geometry.dispose();
+            skull.faceMesh.material.dispose();
+
+            readFileFromServer("animation/" + uploadedDataName["face"] + ".obj", "face", uploadedData, saveFrame);
+
+        }
 
     }
-
-    console.log("[INFO] Load data from client.", uploadedDataName);
-
-    $('#upload-data-modal').modal('hide');
-
-}
-
-function useDefaultData() {
-
-    uploadedDataName["body"] = defaultDataName;
-    uploadedDataName["face"] = defaultDataName;
-    uploadedDataName["sticks"] = defaultDataName;
-
-    skull = new Skull();
-
-    clearScene();
-    console.log("[INFO] Load data from server.", uploadedDataName);
-
-    readFileFromServer(defaultDataName, "body", uploadedData, getMesh);
-    readFileFromServer(defaultDataName, "face", uploadedData, getMesh);
-    readFileFromServer(defaultDataName, "sticks", uploadedData, getMesh);
-
-    $('#upload-data-modal').modal('hide');
 
 }
 
@@ -132,7 +129,6 @@ function getMesh() {
         animate();
 
         initControls();
-        console.log("[INFO] Init controls done.");
 
     }
 
@@ -158,12 +154,13 @@ function clearScene() {
 
     $("#face-opacity-range")[0].disabled = true;
     $("#face-opacity-input")[0].disabled = true;
-    $("#body-opacity-range")[0].disabled = true;
-    $("#body-opacity-input")[0].disabled = true;
-    $("#sticks-opacity-range")[0].disabled = true;
-    $("#sticks-opacity-input")[0].disabled = true;
+    // $("#body-opacity-range")[0].disabled = true;
+    // $("#body-opacity-input")[0].disabled = true;
+    // $("#sticks-opacity-range")[0].disabled = true;
+    // $("#sticks-opacity-input")[0].disabled = true;
 
     $("#set-camera-position")[0].disabled = true;
+    $("#set-camera-target")[0].disabled = true;
 
     console.log("[INFO] Disabled components.");
 
@@ -178,7 +175,7 @@ function initScene() {
         preserveDrawingBuffer: true
     });
     renderer.setSize(canvas.offsetWidth, canvas.offsetHeight);
-    renderer.setClearColor(0x111111);
+    renderer.setClearColor(0x000000);
     renderer.domElement.id = "scene";
     canvas.append(renderer.domElement);
 
@@ -193,25 +190,28 @@ function initScene() {
     // scene.add(axes);
 
     // light
-    var ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+    var ambientIntensity = 0.7;
+    var spotIntensity = 0.4;
+
+    var ambientLight = new THREE.AmbientLight(0xffffff, ambientIntensity);
     scene.add(ambientLight);
 
-    var spotLight0 = new THREE.SpotLight(0xffffff, 0.5);
+    var spotLight0 = new THREE.SpotLight(0xffffff, spotIntensity);
     spotLight0.position.set(scale * 2, -scale, scale * 2);
     spotLight0.angle = Math.PI / 4;
     scene.add(spotLight0);
 
-    var spotLight1 = new THREE.SpotLight(0xffffff, 0.5);
+    var spotLight1 = new THREE.SpotLight(0xffffff, spotIntensity);
     spotLight1.position.set(-scale * 2, -scale, -scale * 2);
     spotLight1.angle = Math.PI / 4;
     scene.add(spotLight1);
 
-    var spotLight2 = new THREE.SpotLight(0xffffff, 0.5);
+    var spotLight2 = new THREE.SpotLight(0xffffff, spotIntensity);
     spotLight2.position.set(-scale * 2, -scale, scale * 2);
     spotLight2.angle = Math.PI / 4;
     scene.add(spotLight2);
 
-    var spotLight3 = new THREE.SpotLight(0xffffff, 0.5);
+    var spotLight3 = new THREE.SpotLight(0xffffff, spotIntensity);
     spotLight3.position.set(scale * 2, -scale, -scale * 2);
     spotLight3.angle = Math.PI / 4;
     scene.add(spotLight3);
@@ -228,7 +228,10 @@ function initScene() {
     controls.enableDamping = true;
     controls.dampingFactor = 0.25;
     controls.maxDistance = scale * 8;
-    controls.target.set(0, -scale, 0);
+    controls.target.set(cameraDefaultTarget.x, cameraDefaultTarget.y, cameraDefaultTarget.z);
+    $("#camera-target-x").html(cameraDefaultTarget.x);
+    $("#camera-target-y").html(cameraDefaultTarget.y);
+    $("#camera-target-z").html(cameraDefaultTarget.z);
     // controls.update();
 
     // Add skull
@@ -263,9 +266,9 @@ function animate() {
 
     animationId = requestAnimationFrame(animate);
 
-    $("#camera-x").html(Math.floor(camera.position.x * 10) / 10);
-    $("#camera-y").html(Math.floor(camera.position.y * 10) / 10);
-    $("#camera-z").html(Math.floor(camera.position.z * 10) / 10);
+    $("#camera-position-x").html(Math.floor(camera.position.x * 10) / 10);
+    $("#camera-position-y").html(Math.floor(camera.position.y * 10) / 10);
+    $("#camera-position-z").html(Math.floor(camera.position.z * 10) / 10);
 
     controls.update();
     stats.update();
@@ -282,6 +285,7 @@ function initControls() {
 
     // Camera
     $("#set-camera-position")[0].disabled = false;
+    $("#set-camera-target")[0].disabled = false;
 
     if (uploadedData["sticks"].state == 4) {
 
@@ -310,6 +314,8 @@ function initControls() {
         // Save sticks
         $("#save-sticks")[0].disabled = false;
 
+        console.log("[INFO] Init controls done.");
+
     }
 
     if (uploadedData["face"].state == 4) {
@@ -325,31 +331,31 @@ function initControls() {
 
     }
 
-    if (uploadedData["body"].state == 4) {
+    // if (uploadedData["body"].state == 4) {
 
-        // Init body opacity
-        var bodyOpacityRangeObj = $("#body-opacity-range")[0];
-        bodyOpacityRangeObj.disabled = false;
-        bodyOpacityRangeObj.value = skull.bodyOpacity;
+    //     // Init body opacity
+    //     var bodyOpacityRangeObj = $("#body-opacity-range")[0];
+    //     bodyOpacityRangeObj.disabled = false;
+    //     bodyOpacityRangeObj.value = skull.bodyOpacity;
 
-        var bodyOpacityInputObj = $("#body-opacity-input")[0];
-        bodyOpacityInputObj.disabled = false;
-        bodyOpacityInputObj.value = skull.bodyOpacity;
+    //     var bodyOpacityInputObj = $("#body-opacity-input")[0];
+    //     bodyOpacityInputObj.disabled = false;
+    //     bodyOpacityInputObj.value = skull.bodyOpacity;
 
-    }
+    // }
 
-    if (uploadedData["sticks"].state == 4) {
+    // if (uploadedData["sticks"].state == 4) {
 
-        // Init sticks opacity
-        var sticksOpacityRangeObj = $("#sticks-opacity-range")[0];
-        sticksOpacityRangeObj.disabled = false;
-        sticksOpacityRangeObj.value = skull.sticksOpacity;
+    //     // Init sticks opacity
+    //     var sticksOpacityRangeObj = $("#sticks-opacity-range")[0];
+    //     sticksOpacityRangeObj.disabled = false;
+    //     sticksOpacityRangeObj.value = skull.sticksOpacity;
 
-        var sticksOpacityInputObj = $("#sticks-opacity-input")[0];
-        sticksOpacityInputObj.disabled = false;
-        sticksOpacityInputObj.value = skull.sticksOpacity;
+    //     var sticksOpacityInputObj = $("#sticks-opacity-input")[0];
+    //     sticksOpacityInputObj.disabled = false;
+    //     sticksOpacityInputObj.value = skull.sticksOpacity;
 
-    }
+    // }
 
 }
 
@@ -440,11 +446,25 @@ function changeStickLengthByInput() {
 
 function setCameraPosition() {
 
-    var x = $("#set-camera-x")[0].value;
-    var y = $("#set-camera-y")[0].value;
-    var z = $("#set-camera-z")[0].value;
+    var x = $("#set-camera-position-x")[0].value;
+    var y = $("#set-camera-position-y")[0].value;
+    var z = $("#set-camera-position-z")[0].value;
 
     camera.position.set(x, y, z);
+
+}
+
+function setCameraTarget() {
+
+    var x = parseInt($("#set-camera-target-x")[0].value);
+    var y = parseInt($("#set-camera-target-y")[0].value);
+    var z = parseInt($("#set-camera-target-z")[0].value);
+
+    controls.target.set(x, y, z);
+
+    $("#camera-target-x").html(x);
+    $("#camera-target-y").html(y);
+    $("#camera-target-z").html(z);
 
 }
 
