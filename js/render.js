@@ -4,6 +4,7 @@ var defaultDataName = "european";
 
 var scale = 130;
 var camera, controls, scene, renderer, stats, animationId;
+var spotLight0, spotLight1, spotLight2, spotLight3;
 var skull;
 var cameraDefaultPosition = {
     "x": -300,
@@ -16,6 +17,8 @@ var cameraDefaultTarget = {
     "y": -scale,
     "z": 0
 };
+
+var spotLightDefaultY = -scale;
 
 $(document).ready(function () {
 
@@ -53,6 +56,8 @@ function getFrame() {
             "y": 20,
             "z": 340
         };
+
+        spotLightDefaultY = -10;
 
         uploadedData.body.state = 4;
 
@@ -175,7 +180,7 @@ function initScene() {
         preserveDrawingBuffer: true
     });
     renderer.setSize(canvas.offsetWidth, canvas.offsetHeight);
-    renderer.setClearColor(0x000000);
+    renderer.setClearColor(0xf0f0f0);
     renderer.domElement.id = "scene";
     canvas.append(renderer.domElement);
 
@@ -196,23 +201,23 @@ function initScene() {
     var ambientLight = new THREE.AmbientLight(0xffffff, ambientIntensity);
     scene.add(ambientLight);
 
-    var spotLight0 = new THREE.SpotLight(0xffffff, spotIntensity);
-    spotLight0.position.set(scale * 2, -scale, scale * 2);
+    spotLight0 = new THREE.SpotLight(0xffffff, spotIntensity);
+    spotLight0.position.set(scale * 2, spotLightDefaultY, scale * 2);
     spotLight0.angle = Math.PI / 4;
     scene.add(spotLight0);
 
-    var spotLight1 = new THREE.SpotLight(0xffffff, spotIntensity);
-    spotLight1.position.set(-scale * 2, -scale, -scale * 2);
+    spotLight1 = new THREE.SpotLight(0xffffff, spotIntensity);
+    spotLight1.position.set(-scale * 2, spotLightDefaultY, -scale * 2);
     spotLight1.angle = Math.PI / 4;
     scene.add(spotLight1);
 
-    var spotLight2 = new THREE.SpotLight(0xffffff, spotIntensity);
-    spotLight2.position.set(-scale * 2, -scale, scale * 2);
+    spotLight2 = new THREE.SpotLight(0xffffff, spotIntensity);
+    spotLight2.position.set(-scale * 2, spotLightDefaultY, scale * 2);
     spotLight2.angle = Math.PI / 4;
     scene.add(spotLight2);
 
-    var spotLight3 = new THREE.SpotLight(0xffffff, spotIntensity);
-    spotLight3.position.set(scale * 2, -scale, -scale * 2);
+    spotLight3 = new THREE.SpotLight(0xffffff, spotIntensity);
+    spotLight3.position.set(scale * 2, spotLightDefaultY, -scale * 2);
     spotLight3.angle = Math.PI / 4;
     scene.add(spotLight3);
 
@@ -289,7 +294,7 @@ function initControls() {
 
     if (uploadedData["sticks"].state == 4) {
 
-        var stickIndex = 0;
+        // var stickIndex = 0;
 
         var stickIndexObj = $("#stick-index")[0];
         stickIndexObj.disabled = false;
@@ -297,19 +302,19 @@ function initControls() {
             var optionObj = $("<option value=\"" + i.toString() + "\">" + i.toString() + "</option>")[0];
             stickIndexObj.append(optionObj);
         }
-        stickIndexObj.value = 0;
+        // stickIndexObj.value = 0;
 
         // Init stick length
         var stickLengthRangeObj = $("#stick-length-range")[0];
         stickLengthRangeObj.disabled = false;
-        stickLengthRangeObj.value = skull.sticks[stickIndex].len;
+        // stickLengthRangeObj.value = skull.sticks[stickIndex].len;
 
         var stickLengthInputObj = $("#stick-length-input")[0];
         stickLengthInputObj.disabled = false;
-        stickLengthInputObj.value = skull.sticks[stickIndex].len;
+        // stickLengthInputObj.value = skull.sticks[stickIndex].len;
 
-        skull.sticks[stickIndex].highlight = true;
-        updateStickMesh(stickIndex);
+        // skull.sticks[stickIndex].highlight = true;
+        // updateStickMesh(stickIndex);
 
         // Save sticks
         $("#save-sticks")[0].disabled = false;
@@ -461,6 +466,10 @@ function setCameraTarget() {
     var z = parseInt($("#set-camera-target-z")[0].value);
 
     controls.target.set(x, y, z);
+    spotLight0.position.set(spotLight0.position.x, y, spotLight0.position.z);
+    spotLight1.position.set(spotLight1.position.x, y, spotLight1.position.z);
+    spotLight2.position.set(spotLight2.position.x, y, spotLight2.position.z);
+    spotLight3.position.set(spotLight3.position.x, y, spotLight3.position.z);
 
     $("#camera-target-x").html(x);
     $("#camera-target-y").html(y);

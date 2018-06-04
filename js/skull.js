@@ -2,6 +2,8 @@ var Skull = function () {
 
     var object = this;
 
+    object.bodyColor = 0xccaa99; // 0xbbaaaa
+    object.faceColor = 0x2ebeb0; // 0xccaa99
     object.bodyOpacity = 1;
     object.faceOpacity = 0.85;
     object.sticksOpacity = 1;
@@ -37,7 +39,7 @@ var Skull = function () {
     // functions
     function setBodyProperties() {
         object.bodyMesh.material.side = object.renderSide;
-        object.bodyMesh.material.color.set(0xbbaaaa);
+        object.bodyMesh.material.color.set(object.bodyColor);
         object.bodyMesh.material.transparent = true;
         object.bodyMesh.material.opacity = object.bodyOpacity;
         object.bodyMesh.renderOrder = 0;
@@ -46,7 +48,7 @@ var Skull = function () {
 
     function setFaceProperties() {
         object.faceMesh.material.side = object.renderSide;
-        object.faceMesh.material.color.set(0xccaa99);
+        object.faceMesh.material.color.set(object.faceColor);
         object.faceMesh.material.transparent = true;
         object.faceMesh.material.opacity = object.faceOpacity;
         object.faceMesh.renderOrder = 2;
@@ -129,7 +131,7 @@ function getRotationAngle(vec) {
 
 function getStickMesh(stick, opacity) {
 
-    var defaultColor = 0x00aabb;
+    var defaultColor = 0xC29DF1;
     var highlightColor = 0xff9900;
 
     var geometry = new THREE.CylinderGeometry(1, 1, stick.len, 16);
