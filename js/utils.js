@@ -67,7 +67,7 @@ function uploadData() {
     }
 
     getMesh();
-    
+
     console.log("[INFO] Load data from client.", uploadedDataName);
 
 }
@@ -82,6 +82,18 @@ function useDefaultData() {
 
     skull = new Skull();
     uploadedData = {};
+
+    cameraDefaultPosition = {
+        "x": -300,
+        "y": -230,
+        "z": 70
+    };
+    
+    cameraDefaultTarget = {
+        "x": 0,
+        "y": -scale,
+        "z": 0
+    };
 
     clearScene();
     console.log("[INFO] Load data from server.", uploadedDataName);
@@ -99,15 +111,17 @@ function saveFrames() {
     skull = new Skull();
 
     uploadedData = {
-        "face": {"state": 3},
-        "sticks": {"state": 3}
+        "face": { "state": 3 },
+        "sticks": { "state": 3 },
+        "body": {"state": 3}
     };
 
     uploadedDataName = {
         "body": "skull"
     };
-    
-    readFileFromServer("animation/" + uploadedDataName["body"] + ".obj", "body", uploadedData, getFrame);
+
+    // readFileFromServer(subFolderName + "/" + uploadedDataName["body"] + ".obj", "body", uploadedData, getFrame);
+    getFrame();
 
 }
 
@@ -278,5 +292,38 @@ function saveSceneByRect(rect, fileName = null) {
         });
 
     };
+
+}
+
+function saveFaceOpacityFrames() {
+
+    $('#screenshot-modal').modal('hide');
+
+    var faceOpacityInputObj = $("#face-opacity-input")[0];
+    var faceOpacityRangeObj = $("#face-opacity-range")[0];
+
+    var id = 0;
+
+    for (var i = 0; i < 10; i++) {
+        
+        setTimeout(function () {
+
+            var opacity = id / 10.0;
+
+            faceOpacityInputObj.value = opacity;
+            faceOpacityRangeObj.value = opacity;
+            
+            skull.faceOpacity = opacity;
+            skull.faceMesh.material.opacity = opacity;
+
+            renderer.render(scene, camera);
+
+            saveSceneSquareSize("face opacity frames-" + id + ".png");
+
+            id = id + 1;
+
+        }, i * 1000);
+
+    }
 
 }

@@ -159,6 +159,11 @@
 								</div>
 								<button type="button" class="btn btn-primary col-5" onclick="saveSceneCustomSize()">Save Custom Size</button>
 							</div>
+							<br>
+							<hr>
+							<div class="form-row justify-content-end">
+								<button type="button" class="btn btn-primary col-7" onclick="saveFaceOpacityFrames()">Save Face Opacity Frames</button>
+							</div>
 						</div>
 					</div>
 				</div>
@@ -232,9 +237,15 @@
 
 			<!-- Side -->
 			<div class="form-group">
-				<div class="custom-control custom-checkbox form-control-sm">
-					<input type="checkbox" class="custom-control-input" id="double-side" disabled="disabled" onchange="setRenderSide()">
-					<label class="custom-control-label" for="double-side">Render as Double Side</label>
+				<div class="form-row justify-content-between">
+					<div class="custom-control custom-checkbox form-control-sm">
+						<input type="checkbox" class="custom-control-input" id="double-side" disabled="disabled" onchange="setRenderSide()">
+						<label class="custom-control-label" for="double-side">Double Side</label>
+					</div>
+					<div class="custom-control custom-checkbox form-control-sm ">
+						<input type="checkbox" class="custom-control-input" id="white-background" disabled="disabled" onchange="setWhiteBackground()">
+						<label class="custom-control-label" for="white-background">White Bg</label>
+					</div>
 				</div>
 			</div>
 

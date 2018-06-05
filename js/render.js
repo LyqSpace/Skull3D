@@ -1,21 +1,23 @@
 var uploadedData = {};
 var uploadedDataName = {};
 var defaultDataName = "european";
+var subFolderName = "animation";
 
 var scale = 130;
 var camera, controls, scene, renderer, stats, animationId;
 var spotLight0, spotLight1, spotLight2, spotLight3;
 var skull;
-var cameraDefaultPosition = {
-    "x": -300,
-    "y": -230,
-    "z": 70
-};
 
 var cameraDefaultTarget = {
-    "x": 0,
-    "y": -scale,
+    "x": 0, 
+    "y": -10,
     "z": 0
+};
+
+var cameraDefaultPosition = {
+    "x": -120,
+    "y": 20,
+    "z": 340
 };
 
 var spotLightDefaultY = -scale;
@@ -30,9 +32,9 @@ $(document).ready(function () {
 
 function getFrame() {
 
-    if (uploadedData.body && uploadedData.body.state == 1) {
-        skull.initBody(uploadedData.body);
-    }
+    // if (uploadedData.body && uploadedData.body.state == 1) {
+    //     skull.initBody(uploadedData.body);
+    // }
 
     var countState = 0;
     for (index in uploadedData) {
@@ -44,21 +46,7 @@ function getFrame() {
         clearScene();
 
         skull.faceOpacity = 1;
-
-        cameraDefaultTarget = {
-            "x": 0, 
-            "y": -10,
-            "z": 0
-        };
-
-        cameraDefaultPosition = {
-            "x": -120,
-            "y": 20,
-            "z": 340
-        };
-
         spotLightDefaultY = -10;
-
         uploadedData.body.state = 4;
 
         initScene();
@@ -68,11 +56,12 @@ function getFrame() {
         var firstIdx = parseInt($("#first-frame-idx")[0].value);
         var lastIdx = parseInt($("#last-frame-idx")[0].value);
         var frameIdx = firstIdx;
+        var step = 3;
 
         uploadedDataName["face"] = "frame-" + frameIdx;
         uploadedData["face"] = null;
 
-        readFileFromServer("animation/" + uploadedDataName["face"] + ".obj", "face", uploadedData, saveFrame);
+        readFileFromServer(subFolderName + "/" + uploadedDataName["face"] + ".obj", "face", uploadedData, saveFrame);
 
         function saveFrame() {
 
@@ -87,7 +76,7 @@ function getFrame() {
             saveSceneSquareSize(uploadedDataName["face"] + ".png");
 
             // next frame
-            frameIdx = frameIdx + 1;
+            frameIdx = frameIdx + step;
             if (frameIdx > lastIdx) return;
 
             uploadedDataName["face"] = "frame-" + frameIdx;
@@ -97,7 +86,7 @@ function getFrame() {
             skull.faceMesh.geometry.dispose();
             skull.faceMesh.material.dispose();
 
-            readFileFromServer("animation/" + uploadedDataName["face"] + ".obj", "face", uploadedData, saveFrame);
+            readFileFromServer(subFolderName + "/" + uploadedDataName["face"] + ".obj", "face", uploadedData, saveFrame);
 
         }
 
@@ -156,6 +145,7 @@ function clearScene() {
     $("#stick-length-input")[0].disabled = true;
 
     $("#double-side")[0].disabled = true;
+    $("#white-background")[0].disabled = true;
 
     $("#face-opacity-range")[0].disabled = true;
     $("#face-opacity-input")[0].disabled = true;
@@ -180,7 +170,7 @@ function initScene() {
         preserveDrawingBuffer: true
     });
     renderer.setSize(canvas.offsetWidth, canvas.offsetHeight);
-    renderer.setClearColor(0xf0f0f0);
+    renderer.setClearColor(0x000000);
     renderer.domElement.id = "scene";
     canvas.append(renderer.domElement);
 
@@ -287,6 +277,7 @@ function initControls() {
 
     // Render Side
     $("#double-side")[0].disabled = false;
+    $("#white-background")[0].disabled = false;
 
     // Camera
     $("#set-camera-position")[0].disabled = false;
@@ -496,6 +487,20 @@ function setRenderSide() {
     }
 
     console.log("Change render side as", (doubleSide) ? "DoubleSide" : "SingleSide");
+
+}
+
+function setWhiteBackground() {
+
+    var whiteBackground = $("#white-background")[0].checked;
+
+    if (whiteBackground) {
+        renderer.setClearColor(0xffffff);
+    } else {
+        renderer.setClearColor(0x000000);
+    }
+
+    console.log("Change background color", (whiteBackground) ? "white": "black");
 
 }
 
