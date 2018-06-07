@@ -93,22 +93,26 @@
 							<input type="file" class="form-control-file" id="sticks-file" accept=".cm">
 							<br>
 							<div class="form-row justify-content-end">
-									<button type="button" class="btn btn-secondary" onclick="useDefaultData()">Use Default Data</button>
-									<button type="button" class="btn btn-primary offset-1" onclick="uploadData()">Upload</button>
+								<button type="button" class="btn btn-secondary" onclick="useDefaultData()">Use Default Data</button>
+								<button type="button" class="btn btn-primary offset-1" onclick="uploadData()">Upload</button>
 							</div>
-							
+
 							<br>
 							<hr>
-							
-							<label>Advanced Option:</label>
+
+							<label>Advanced Option: (Locally Available)</label>
 
 							<div class="form-row">
 								<div class="col-8">
 									<div class="form-row">
-										<label class="col-2">First:</label>
+										<label class="col-1">St:</label>
 										<input type="text" class="form-control col-2" id="first-frame-idx">
-										<label class="col-2 offset-1">Last:</label>
+										<label class="col-1 offset-1">Ed</label>
 										<input type="text" class="form-control col-2" id="last-frame-idx">
+										<div class="custom-control custom-checkbox offset-1">
+											<input type="checkbox" class="custom-control-input" id="view-all-checked">
+											<label class="custom-control-label" for="view-all-checked">View All</label>
+										</div>
 									</div>
 								</div>
 								<button type="button" class="btn btn-primary col-4" onclick="saveFrames()">Save Frames</button>
@@ -221,8 +225,7 @@
 					<input type="text" id="set-camera-target-x" class="form-control form-control-sm col-2">
 					<input type="text" id="set-camera-target-y" class="form-control form-control-sm col-2 offset-1">
 					<input type="text" id="set-camera-target-z" class="form-control form-control-sm col-2 offset-1">
-					<button type="button" class="btn btn-outline-primary btn-sm col-3 offset-1" id="set-camera-target" disabled="disabled"
-					 onclick="setCameraTarget()">Set</button>
+					<button type="button" class="btn btn-outline-primary btn-sm col-3 offset-1" id="set-camera-target" disabled="disabled" onclick="setCameraTarget()">Set</button>
 				</div>
 				<div class="form-row">
 					<label class="col-1">X=</label>

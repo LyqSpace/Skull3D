@@ -1,7 +1,8 @@
 var uploadedData = {};
 var uploadedDataName = {};
 var defaultDataName = "european";
-var subFolderName = "animation";
+var subFolderName = "ani2";
+var viewAllChecked = false;
 
 var scale = 130;
 var camera, controls, scene, renderer, stats, animationId;
@@ -32,9 +33,9 @@ $(document).ready(function () {
 
 function getFrame() {
 
-    // if (uploadedData.body && uploadedData.body.state == 1) {
-    //     skull.initBody(uploadedData.body);
-    // }
+    if (uploadedData.body && uploadedData.body.state == 1) {
+        skull.initBody(uploadedData.body);
+    }
 
     var countState = 0;
     for (index in uploadedData) {
@@ -45,9 +46,14 @@ function getFrame() {
 
         clearScene();
 
+        if (uploadedData.body.state == 2) uploadedData.body.state = 4;
+
         skull.faceOpacity = 1;
         spotLightDefaultY = -10;
-        uploadedData.body.state = 4;
+
+        if (viewAllChecked){
+            skull.faceOpacity = 0.5;
+        }
 
         initScene();
 
@@ -56,20 +62,51 @@ function getFrame() {
         var firstIdx = parseInt($("#first-frame-idx")[0].value);
         var lastIdx = parseInt($("#last-frame-idx")[0].value);
         var frameIdx = firstIdx;
-        var step = 3;
+        var step = 1;
 
         uploadedDataName["face"] = "frame-" + frameIdx;
-        uploadedData["face"] = null;
+        uploadedData["face"] = {"state" : 0};
 
-        readFileFromServer(subFolderName + "/" + uploadedDataName["face"] + ".obj", "face", uploadedData, saveFrame);
+        if (viewAllChecked) {
+            uploadedDataName["sticks"] = "frame-" + frameIdx;
+            uploadedData["sticks"] = {"state" : 0};
+        }
+
+        readFileFromServer(subFolderName + "/" + uploadedDataName.face + ".obj", "face", uploadedData, saveFrame);
+
+        if (viewAllChecked) {
+            readFileFromServer(subFolderName + "/" + uploadedDataName.sticks + "_stick.cm", "sticks", uploadedData, saveFrame);
+        }
 
         function saveFrame() {
+            
+            if (uploadedData.face.state == 1) {
+                skull.initFace(uploadedData.face);
+            }
+
+            if (viewAllChecked && uploadedData.sticks.state == 1) {
+                skull.initSticks(uploadedData.sticks);
+            }
+
+            if (uploadedData.face.state != 2 || (viewAllChecked && uploadedData.sticks.state != 2)) {
+                return;
+            } else {
+                uploadedData.face.state = 4;
+                if (viewAllChecked) {
+                    uploadedData.sticks.state = 4;
+                }    
+            }
 
             // current frame
             console.log("[INFO] Save", frameIdx, "frame.");
-
-            skull.initFace(uploadedData.face);
+            
             scene.add(skull.faceMesh);
+
+            if (viewAllChecked) {
+                for (var i = 0; i < skull.sticksMesh.length; i++) {
+                    scene.add(skull.sticksMesh[i]);
+                }
+            }
 
             renderer.render(scene, camera);
 
@@ -80,13 +117,26 @@ function getFrame() {
             if (frameIdx > lastIdx) return;
 
             uploadedDataName["face"] = "frame-" + frameIdx;
-            uploadedData["face"] = null;
+            uploadedData["face"] = {"state" : 0};
 
             scene.remove(skull.faceMesh);
             skull.faceMesh.geometry.dispose();
             skull.faceMesh.material.dispose();
 
             readFileFromServer(subFolderName + "/" + uploadedDataName["face"] + ".obj", "face", uploadedData, saveFrame);
+
+            if (viewAllChecked) {
+                uploadedDataName["sticks"] = "frame-" + frameIdx;
+                uploadedData["face"] = {"state" : 0};
+
+                for (var i = 0; i < skull.sticksMesh.length; i++) {
+                    scene.remove(skull.sticksMesh[i]);
+                    skull.sticksMesh[i].geometry.dispose();
+                    skull.sticksMesh[i].material.dispose();
+
+                    readFileFromServer(subFolderName + "/" + uploadedDataName.sticks + "_stick.cm", "sticks", uploadedData, saveFrame);
+                }
+            }
 
         }
 

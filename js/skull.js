@@ -38,7 +38,7 @@ var Skull = function () {
 
     // functions
     function setBodyProperties() {
-        object.bodyMesh.material.side = object.renderSide;
+        object.bodyMesh.material.side = THREE.DoubleSide; // object.renderSide;
         object.bodyMesh.material.color.set(object.bodyColor);
         object.bodyMesh.material.transparent = true;
         object.bodyMesh.material.opacity = object.bodyOpacity;
@@ -62,6 +62,8 @@ var Skull = function () {
         object.sticks = [];
 
         for (var i = 0; i < arr.length; i += 2) {
+
+            if (arr[i].length == 0) continue;
 
             var tuple0 = arr[i].split(" ");
             var tuple1 = arr[i + 1].split(" ");
@@ -131,8 +133,8 @@ function getRotationAngle(vec) {
 
 function getStickMesh(stick, opacity) {
 
-    var defaultColor = 0xC29DF1;
-    var highlightColor = 0xff9900;
+    var defaultColor = 0xff9900;// 0xC29DF1;
+    var highlightColor = 0xff0000; // 0xff9900;
 
     var geometry = new THREE.CylinderGeometry(1, 1, stick.len, 16);
 

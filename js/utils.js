@@ -106,6 +106,8 @@ function useDefaultData() {
 
 function saveFrames() {
 
+    viewAllChecked =  $("#view-all-checked")[0].checked;
+
     $('#upload-data-modal').modal('hide');
 
     skull = new Skull();
@@ -113,15 +115,20 @@ function saveFrames() {
     uploadedData = {
         "face": { "state": 3 },
         "sticks": { "state": 3 },
-        "body": {"state": 3}
     };
 
     uploadedDataName = {
         "body": "skull"
     };
 
-    // readFileFromServer(subFolderName + "/" + uploadedDataName["body"] + ".obj", "body", uploadedData, getFrame);
-    getFrame();
+    if (viewAllChecked) {
+        readFileFromServer(subFolderName + "/" + uploadedDataName["body"] + ".obj", "body", uploadedData, getFrame);
+    } else {
+        uploadedData["body"] = {
+            "state": 3
+        }
+        getFrame();
+    }
 
 }
 
@@ -318,7 +325,7 @@ function saveFaceOpacityFrames() {
 
             renderer.render(scene, camera);
 
-            saveSceneSquareSize("face opacity frames-" + id + ".png");
+            saveSceneSquareSize("face opacity frame-" + id + ".png");
 
             id = id + 1;
 
